@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Forca da Segurança | SafeSeg</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --amber:#F59E0B; --graphite:#14171B; --graphite-2:#1E2228; --graphite-3:#2A2F37;
+    --danger:#D9291C; --ok:#2E9B4F; --paper:#F4F1E9;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{margin:0; background:radial-gradient(1200px 600px at 10% -10%, #23272f 0%, transparent 60%), var(--graphite); color:var(--paper); font-family:'Inter',sans-serif; min-height:100vh;}
+  .hazard{height:10px; background:repeating-linear-gradient(135deg,var(--amber) 0 22px,var(--graphite) 22px 44px);}
+  header{padding:22px 20px 16px; text-align:center; border-bottom:1px solid var(--graphite-3);}
+  .eyebrow{font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:var(--amber); font-weight:700; margin-bottom:6px;}
+  h1{font-family:'Bebas Neue'; font-size:clamp(32px,8vw,50px); margin:0; color:#fff; letter-spacing:.02em; line-height:.95;}
+  h1 span{color:var(--amber);}
+  .sub{color:#9AA1AC; font-size:14px; margin-top:8px; max-width:520px; margin:8px auto 0;}
+  main{max-width:640px; margin:0 auto; padding:20px 16px 60px;}
+  a.back{display:inline-block; margin-top:14px; font-size:12px; color:#8A909B; text-decoration:underline;}
+
+  .btn{display:block; width:100%; border:none; border-radius:10px; padding:15px; font-family:'Bebas Neue'; font-size:18px; letter-spacing:.05em; cursor:pointer;}
+  .btn:active{transform:scale(.98);}
+  .btn-amber{background:var(--amber); color:#1a1200;}
+  .btn-danger{background:var(--danger); color:#fff;}
+  .btn-ghost{background:transparent; border:1px solid var(--graphite-3); color:#9AA1AC;}
+
+  .startScreen{text-align:center; background:var(--graphite-2); border:1px solid var(--graphite-3); border-radius:16px; padding:34px 20px; margin-top:20px;}
+  .startScreen .ic{font-size:48px; margin-bottom:10px;}
+  .startScreen h2{font-family:'Bebas Neue'; font-size:26px; color:#fff; margin:0 0 10px;}
+  .startScreen p{font-size:14px; color:#B7BCC4; line-height:1.6; max-width:420px; margin:0 auto 22px;}
+
+  .teamsRow{display:flex; gap:10px; margin-bottom:16px;}
+  .teamBox{flex:1; background:var(--graphite-2); border:2px solid var(--graphite-3); border-radius:12px; padding:12px; text-align:center;}
+  .teamBox.active{border-color:var(--amber); background:rgba(245,158,11,.08);}
+  .teamBox .name{font-size:12px; color:#9AA1AC; text-transform:uppercase; letter-spacing:.06em;}
+  .teamBox b{display:block; font-family:'Bebas Neue'; font-size:24px; color:var(--amber);}
+
+  .hats{display:flex; justify-content:center; gap:6px; margin:16px 0; font-size:26px;}
+  .hats span.lost{opacity:.15; filter:grayscale(1);}
+
+  .hint{text-align:center; font-size:12.5px; color:#8A909B; margin-bottom:8px;}
+  .wordDisplay{
+    display:flex; justify-content:center; flex-wrap:wrap; gap:8px; margin:14px 0 20px;
+  }
+  .wordDisplay .ltr{
+    width:34px; height:44px; border-bottom:3px solid var(--graphite-3);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Bebas Neue'; font-size:26px; color:#fff;
+  }
+  .wordDisplay .ltr.space{border-bottom:none; width:16px;}
+
+  .keyboard{display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:20px;}
+  .key{
+    background:var(--graphite-3); border:none; border-radius:8px; padding:10px 0;
+    font-family:'Bebas Neue'; font-size:15px; color:#fff; cursor:pointer;
+  }
+  .key.used{opacity:.25; cursor:not-allowed;}
+  .key.right{background:var(--ok);}
+  .key.wrong{background:var(--danger);}
+
+  .end{display:none; text-align:center; background:var(--graphite-2); border:1px solid var(--amber); border-radius:16px; padding:30px 20px; margin-top:14px;}
+  .end.show{display:block;}
+  .end .ic{font-size:56px; margin-bottom:8px;}
+  .end h2{font-family:'Bebas Neue'; font-size:26px; color:#fff; margin:0 0 8px;}
+  .end p{color:#B7BCC4; font-size:14px; line-height:1.6; max-width:400px; margin:0 auto 18px;}
+
+  footer{text-align:center; padding:24px 16px 40px; color:#5B616C; font-size:11.5px; letter-spacing:.04em;}
+  .logo{font-family:'Bebas Neue'; color:#8A909B; letter-spacing:.06em;}
+  .logo b{color:var(--amber);}
+</style>
+</head>
+<body>
+<div class="hazard"></div>
+<header>
+  <div class="eyebrow">SafeSeg · Segurança do Trabalho</div>
+  <h1>FORCA DA <span>SEGURANÇA</span></h1>
+  <div class="sub">Times se revezam chutando letras pra descobrir o termo técnico. Errar demais custa um capacete.</div>
+  <a class="back" href="index.html">← voltar para as dinâmicas</a>
+</header>
+
+<main>
+  <div class="startScreen" id="startScreen">
+    <div class="ic">🪖</div>
+    <h2>Pronto pra começar?</h2>
+    <p>Dois times se revezam chutando letras. Cada erro "quebra" um capacete — 6 erros e a rodada é perdida, mas o termo aparece com sua definição.</p>
+    <button class="btn btn-amber" id="startBtn">▶ COMEÇAR</button>
+  </div>
+
+  <div id="gameArea" style="display:none;">
+    <div class="teamsRow">
+      <div class="teamBox" id="teamA"><span class="name">Time A</span><b id="scoreA">0</b></div>
+      <div class="teamBox" id="teamB"><span class="name">Time B</span><b id="scoreB">0</b></div>
+    </div>
+
+    <div class="hats" id="hatsRow"></div>
+    <div class="hint" id="hintText"></div>
+    <div class="wordDisplay" id="wordDisplay"></div>
+    <div class="keyboard" id="keyboard"></div>
+
+    <button class="btn btn-ghost" id="skipBtn">PULAR ESTE TERMO →</button>
+  </div>
+
+  <div class="end" id="endScreen">
+    <div class="ic" id="endIcon">🎉</div>
+    <h2 id="endTitle">ACERTOU!</h2>
+    <p id="endMsg"></p>
+    <button class="btn btn-amber" id="nextWordBtn">PRÓXIMO TERMO →</button>
+  </div>
+</main>
+
+<footer>
+  <div class="logo">Safe<b>Seg</b> Segurança do Trabalho</div>
+  Segurança é o caminho de volta pra casa.
+</footer>
+
+<script>
+const TERMS = [
+  { w:"CAPACETE", hint:"EPI que protege a cabeça contra impacto e queda de objetos" },
+  { w:"BLOQUEIO", hint:"Ação de impedir que uma máquina ou circuito seja religado durante manutenção" },
+  { w:"ATERRAMENTO", hint:"Conexão que neutraliza energia residual ou induzida num circuito elétrico" },
+  { w:"ANDAIME", hint:"Estrutura temporária usada para trabalho em altura" },
+  { w:"VIGIA", hint:"Pessoa que fica do lado de fora monitorando um espaço confinado" },
+  { w:"EXTINTOR", hint:"Equipamento usado para combater princípios de incêndio" },
+  { w:"ERGONOMIA", hint:"Estudo da adaptação do trabalho às condições do ser humano" },
+  { w:"ANCORAGEM", hint:"Ponto certificado onde se conecta o cinto de segurança em altura" },
+  { w:"EPI", hint:"Sigla para Equipamento de Proteção Individual" },
+  { w:"SINALIZACAO", hint:"Conjunto de placas e avisos que alertam sobre riscos" },
+  { w:"INCENDIO", hint:"Fogo fora de controle que exige combate imediato" },
+  { w:"RESGATE", hint:"Ação de retirar com segurança uma vítima de um ambiente de risco" },
+  { w:"ESPACO CONFINADO", hint:"Ambiente com ventilação insuficiente e risco de atmosfera perigosa" },
+  { w:"MASCARA", hint:"EPI que protege as vias respiratórias" },
+  { w:"CINTO DE SEGURANCA", hint:"EPI que impede queda em trabalho em altura" },
+  { w:"CHOQUE ELETRICO", hint:"Passagem de corrente elétrica pelo corpo humano" },
+  { w:"PET", hint:"Sigla para Permissão de Entrada e Trabalho" },
+  { w:"CIPA", hint:"Comissão interna que trata da prevenção de acidentes" },
+  { w:"LUVA", hint:"EPI usado para proteger as mãos" },
+  { w:"ACIDENTE", hint:"Evento indesejado que causa dano a pessoas, bens ou ao ambiente" }
+];
+
+let currentIdx = 0;
+let order = [];
+let guessed = [];
+let wrongCount = 0;
+let activeTeam = 'A';
+let score = { A:0, B:0 };
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function normalize(c){
+  return c.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
+function renderHats(){
+  const row = document.getElementById('hatsRow');
+  let html = '';
+  for(let i=0;i<6;i++){
+    html += `<span class="${i < wrongCount ? 'lost' : ''}">🪖</span>`;
+  }
+  row.innerHTML = html;
+}
+
+function renderWord(){
+  const term = TERMS[order[currentIdx]];
+  const el = document.getElementById('wordDisplay');
+  el.innerHTML = term.w.split('').map(ch=>{
+    if(ch === ' ') return '<div class="ltr space"></div>';
+    const shown = guessed.includes(normalize(ch)) ? ch : '';
+    return `<div class="ltr">${shown}</div>`;
+  }).join('');
+}
+
+function renderKeyboard(){
+  const kb = document.getElementById('keyboard');
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  kb.innerHTML = '';
+  letters.forEach(l=>{
+    const btn = document.createElement('button');
+    btn.className = 'key';
+    btn.textContent = l;
+    btn.addEventListener('click', ()=>onGuess(l, btn));
+    kb.appendChild(btn);
+  });
+}
+
+function updateTeamHighlight(){
+  document.getElementById('teamA').classList.toggle('active', activeTeam==='A');
+  document.getElementById('teamB').classList.toggle('active', activeTeam==='B');
+}
+
+function onGuess(letter, btn){
+  const term = TERMS[order[currentIdx]];
+  const normWord = normalize(term.w);
+  btn.classList.add('used');
+  btn.disabled = true;
+
+  if(normWord.includes(letter)){
+    guessed.push(letter);
+    btn.classList.add('right');
+    renderWord();
+    const allFound = term.w.split('').every(ch => ch === ' ' || guessed.includes(normalize(ch)));
+    if(allFound){
+      score[activeTeam]++;
+      document.getElementById('score'+activeTeam).textContent = score[activeTeam];
+      showEnd(true, term);
+    }
+  } else {
+    btn.classList.add('wrong');
+    wrongCount++;
+    renderHats();
+    if(wrongCount >= 6){
+      showEnd(false, term);
+    } else {
+      activeTeam = activeTeam === 'A' ? 'B' : 'A';
+      updateTeamHighlight();
+    }
+  }
+}
+
+function showEnd(won, term){
+  document.getElementById('gameArea').style.display = 'none';
+  const end = document.getElementById('endScreen');
+  document.getElementById('endIcon').textContent = won ? '🎉' : '💥';
+  document.getElementById('endTitle').textContent = won ? `TIME ${activeTeam} ACERTOU!` : 'ACABARAM OS CAPACETES';
+  document.getElementById('endMsg').textContent = `A palavra era "${term.w}" — ${term.hint}.`;
+  end.classList.add('show');
+}
+
+function loadWord(){
+  guessed = [];
+  wrongCount = 0;
+  const term = TERMS[order[currentIdx]];
+  document.getElementById('hintText').textContent = '💡 ' + term.hint;
+  renderHats();
+  renderWord();
+  renderKeyboard();
+}
+
+document.getElementById('skipBtn').addEventListener('click', nextWord);
+document.getElementById('nextWordBtn').addEventListener('click', nextWord);
+
+function nextWord(){
+  document.getElementById('endScreen').classList.remove('show');
+  document.getElementById('gameArea').style.display = '';
+  currentIdx++;
+  if(currentIdx >= order.length){
+    order = shuffle(TERMS.map((_,i)=>i));
+    currentIdx = 0;
+  }
+  activeTeam = activeTeam === 'A' ? 'B' : 'A';
+  updateTeamHighlight();
+  loadWord();
+}
+
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  order = shuffle(TERMS.map((_,i)=>i));
+  currentIdx = 0;
+  score = { A:0, B:0 };
+  document.getElementById('scoreA').textContent = 0;
+  document.getElementById('scoreB').textContent = 0;
+  activeTeam = 'A';
+  updateTeamHighlight();
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('gameArea').style.display = '';
+  loadWord();
+});
+</script>
+</body>
+</html>

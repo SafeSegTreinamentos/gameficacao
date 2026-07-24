@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Roleta da Sorte | SafeSeg</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --amber:#F59E0B; --graphite:#14171B; --graphite-2:#1E2228; --graphite-3:#2A2F37;
+    --danger:#D9291C; --ok:#2E9B4F; --paper:#F4F1E9;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{margin:0; background:radial-gradient(1200px 600px at 10% -10%, #23272f 0%, transparent 60%), var(--graphite); color:var(--paper); font-family:'Inter',sans-serif; min-height:100vh;}
+  .hazard{height:10px; background:repeating-linear-gradient(135deg,var(--amber) 0 22px,var(--graphite) 22px 44px);}
+  header{padding:22px 20px 16px; text-align:center; border-bottom:1px solid var(--graphite-3);}
+  .eyebrow{font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:var(--amber); font-weight:700; margin-bottom:6px;}
+  h1{font-family:'Bebas Neue'; font-size:clamp(32px,8vw,50px); margin:0; color:#fff; letter-spacing:.02em; line-height:.95;}
+  h1 span{color:var(--amber);}
+  .sub{color:#9AA1AC; font-size:14px; margin-top:8px; max-width:520px; margin:8px auto 0;}
+  main{max-width:640px; margin:0 auto; padding:26px 16px 60px; text-align:center;}
+  a.back{display:inline-block; margin-top:14px; font-size:12px; color:#8A909B; text-decoration:underline;}
+
+  .btn{display:block; width:100%; border:none; border-radius:10px; padding:15px; font-family:'Bebas Neue'; font-size:18px; letter-spacing:.05em; cursor:pointer;}
+  .btn:active{transform:scale(.98);}
+  .btn-amber{background:var(--amber); color:#1a1200;}
+  .btn[disabled]{opacity:.4; cursor:not-allowed;}
+
+  .wheelWrap{position:relative; width:min(320px,80vw); aspect-ratio:1/1; margin:20px auto 10px;}
+  .pointer{
+    position:absolute; top:-6px; left:50%; transform:translateX(-50%);
+    width:0; height:0; border-left:14px solid transparent; border-right:14px solid transparent;
+    border-top:22px solid var(--amber); z-index:5;
+  }
+  .wheel{
+    width:100%; height:100%; border-radius:50%; position:relative; overflow:hidden;
+    border:6px solid var(--graphite-3); box-shadow:0 0 0 3px var(--amber), 0 10px 30px rgba(0,0,0,.5);
+    transition:transform 3.2s cubic-bezier(.17,.89,.32,1.1);
+  }
+  .wheel .seg{
+    position:absolute; width:50%; height:50%; top:50%; left:50%;
+    transform-origin:0% 0%;
+    display:flex; align-items:center; justify-content:flex-end;
+    padding-right:14px;
+  }
+  .wheel .seg span{
+    color:#fff; font-family:'Bebas Neue'; font-size:13px; letter-spacing:.02em;
+    transform:rotate(180deg); display:inline-block; max-width:78px; line-height:1.05; text-align:right;
+  }
+  .hub{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:22%; height:22%; border-radius:50%; background:var(--graphite);
+    border:3px solid var(--amber); z-index:4; display:flex; align-items:center; justify-content:center;
+    font-size:22px;
+  }
+
+  .spinBtn{max-width:280px; margin:14px auto 0;}
+
+  .resultCard{display:none; margin-top:22px; background:var(--graphite-2); border:1px solid var(--graphite-3); border-radius:16px; padding:22px 20px; text-align:left;}
+  .resultCard.show{display:block; animation:pop .25s ease;}
+  @keyframes pop{from{opacity:0; transform:scale(.92);}to{opacity:1; transform:scale(1);}}
+  .resultCard .catTag{display:inline-block; font-family:'Bebas Neue'; font-size:13px; letter-spacing:.08em; padding:5px 12px; border-radius:999px; color:#fff; margin-bottom:12px;}
+  .resultCard h2{font-size:18px; color:#fff; margin:0 0 16px; line-height:1.4;}
+  .options{display:flex; flex-direction:column; gap:9px; margin-bottom:14px;}
+  .opt{background:var(--graphite-3); border-radius:9px; padding:12px 14px; font-size:13.5px; color:#E5E7EB; text-align:left; display:flex; gap:8px; border:1px solid transparent;}
+  .opt b{color:var(--amber); flex:none;}
+  .opt.correct{border-color:var(--ok); background:rgba(46,155,79,.15);}
+  .revealWrap{margin-top:6px;}
+  .expBox{display:none; margin-top:12px; background:rgba(245,158,11,.08); border-left:3px solid var(--amber); border-radius:8px; padding:12px 14px; font-size:13px; color:#C8CDD5; line-height:1.5;}
+  .expBox.show{display:block;}
+
+  footer{text-align:center; padding:24px 16px 40px; color:#5B616C; font-size:11.5px; letter-spacing:.04em;}
+  .logo{font-family:'Bebas Neue'; color:#8A909B; letter-spacing:.06em;}
+  .logo b{color:var(--amber);}
+</style>
+</head>
+<body>
+<div class="hazard"></div>
+<header>
+  <div class="eyebrow">SafeSeg · Segurança do Trabalho</div>
+  <h1>ROLETA DA <span>SORTE</span></h1>
+  <div class="sub">Gire a roleta, ela escolhe o tema — e uma pergunta daquele tema aparece na hora.</div>
+  <a class="back" href="index.html">← voltar para as dinâmicas</a>
+</header>
+
+<main>
+  <div class="wheelWrap">
+    <div class="pointer"></div>
+    <div class="wheel" id="wheel"></div>
+    <div class="hub">🎯</div>
+  </div>
+
+  <button class="btn btn-amber spinBtn" id="spinBtn">🎡 GIRAR A ROLETA</button>
+
+  <div class="resultCard" id="resultCard">
+    <span class="catTag" id="catTag"></span>
+    <h2 id="qText"></h2>
+    <div class="options" id="options"></div>
+    <div class="revealWrap">
+      <button class="btn btn-amber" id="revealBtn" style="max-width:220px; margin:0 auto;">MOSTRAR RESPOSTA</button>
+    </div>
+    <div class="expBox" id="expBox"></div>
+  </div>
+</main>
+
+<footer>
+  <div class="logo">Safe<b>Seg</b> Segurança do Trabalho</div>
+  Segurança é o caminho de volta pra casa.
+</footer>
+
+<script>
+const CATEGORIES = [
+  { id:'epi', label:'EPI', color:'#2D6CDF', icon:'🦺' },
+  { id:'eletrica', label:'Elétrica', color:'#F59E0B', icon:'⚡' },
+  { id:'confinado', label:'Espaço Confinado', color:'#178A6F', icon:'🕳️' },
+  { id:'maquinas', label:'Máquinas', color:'#5B3E97', icon:'⚙️' },
+  { id:'incendio', label:'Incêndio', color:'#D9291C', icon:'🔥' },
+  { id:'ergonomia', label:'Ergonomia', color:'#B23A6B', icon:'🧍' },
+  { id:'socorros', label:'1º Socorros', color:'#2E9B4F', icon:'🩹' },
+  { id:'geral', label:'Geral', color:'#3C5A73', icon:'📋' }
+];
+
+const QUESTIONS = {
+  epi: [
+    { q:"Quem deve fornecer o EPI ao trabalhador, gratuitamente?", opts:["O próprio trabalhador","O empregador","O sindicato","Só em empresas grandes"], c:1, exp:"É obrigação do empregador fornecer, gratuitamente, o EPI adequado ao risco." },
+    { q:"Um capacete rachado ou danificado deve ser:", opts:["Usado até o fim do dia","Substituído imediatamente","Reforçado com fita","Usado em atividades leves"], c:1, exp:"Qualquer dano compromete a proteção — deve ser substituído na hora." },
+    { q:"O Certificado de Aprovação (CA) de um EPI serve para:", opts:["Decoração da embalagem","Comprovar que o EPI foi testado e aprovado pelo governo","Indicar o preço do produto","Nada, é só burocracia"], c:1, exp:"O CA garante que o equipamento passou por testes oficiais de eficácia." },
+    { q:"Luvas de proteção devem ser escolhidas de acordo com:", opts:["A cor preferida do trabalhador","O tipo específico de risco da atividade","O tamanho da mão apenas","O que estiver disponível no almoxarifado"], c:1, exp:"Cada risco (químico, corte, calor, elétrico) exige um tipo específico de luva." },
+    { q:"Um EPI vencido, mas com boa aparência, pode ser usado?", opts:["Sim, se estiver limpo", "Não — a validade deve ser respeitada", "Sim, por até 1 semana", "Depende do humor do supervisor"], c:1, exp:"A validade existe porque o material perde eficácia com o tempo, mesmo sem sinais visíveis." },
+    { q:"Protetor auricular é obrigatório quando:", opts:["O ambiente tem música", "O nível de ruído ultrapassa o limite de tolerância", "O trabalhador pede", "Nunca é obrigatório"], c:1, exp:"A obrigatoriedade depende da medição do nível de ruído do ambiente." }
+  ],
+  eletrica: [
+    { q:"Antes de mexer em qualquer painel elétrico, o primeiro passo é:", opts:["Testar com a mão","Desligar e bloquear a fonte de energia","Pedir pra alguém segurar a chave","Trabalhar rápido"], c:1, exp:"O bloqueio impede que a energia seja religada durante o serviço." },
+    { q:"Mesmo com o equipamento desligado, antes de tocar é preciso:", opts:["Confiar que está seguro","Testar a ausência de tensão","Contar até 10","Perguntar pro colega"], c:1, exp:"O teste confirma na prática que não há energia, em vez de supor." },
+    { q:"A etiqueta de bloqueio (LOTO) serve para:", opts:["Decorar o painel","Impedir que outra pessoa religue o equipamento","Indicar o preço do reparo","Nada específico"], c:1, exp:"Avisa que o equipamento está bloqueado e por quem, evitando religação indevida." },
+    { q:"O que é aterramento temporário, na desenergização elétrica?", opts:["Um cabo qualquer amarrado no chão","Uma conexão que neutraliza energia induzida ou residual durante o serviço","Um adorno de segurança","Uma etapa opcional"], c:1, exp:"Protege contra energia que pode reaparecer no circuito por indução ou retorno." },
+    { q:"Distância de segurança em instalações elétricas de alta tensão serve para:", opts:["Deixar o ambiente mais organizado","Evitar arco elétrico e choque por aproximação","Facilitar a limpeza","Não tem função real"], c:1, exp:"Mesmo sem contato direto, a aproximação de partes energizadas pode causar acidente grave." },
+    { q:"NR-10 SEP trata especificamente de:", opts:["Instalações elétricas residenciais","Sistema Elétrico de Potência (geração, transmissão, distribuição)","Eletrodomésticos","Iluminação de escritório"], c:1, exp:"O SEP cobre as particularidades de trabalhos em alta tensão do sistema elétrico de potência." }
+  ],
+  confinado: [
+    { q:"Antes de entrar num espaço confinado, o que deve ser testado?", opts:["A temperatura da pele","A atmosfera interna com detector calibrado","O barulho do ambiente","Nada, se parecer seguro"], c:1, exp:"Atmosferas perigosas costumam ser invisíveis e inodoras — só o teste confirma." },
+    { q:"Quem fica do lado de fora, monitorando continuamente?", opts:["Ninguém","O vigia","O motorista","O trabalhador revezando"], c:1, exp:"O vigia tem função exclusiva de monitorar, sem se distrair com outra tarefa." },
+    { q:"Sem qual documento a entrada não pode ser autorizada?", opts:["Carteira de trabalho","PET (Permissão de Entrada e Trabalho)","Crachá","Nenhum documento é necessário"], c:1, exp:"A PET formaliza a autorização e os riscos avaliados para aquela entrada específica." },
+    { q:"Gases mais pesados que o ar tendem a se acumular:", opts:["No topo do espaço","No fundo do espaço","Distribuídos igualmente","Não se acumulam"], c:1, exp:"Por isso poços e tanques são especialmente perigosos para esse tipo de gás." },
+    { q:"Trabalhar sozinho em espaço confinado é permitido se:", opts:["O trabalhador for experiente","Nunca é permitido","For por poucos minutos","O supervisor autorizar informalmente"], c:1, exp:"A exigência de vigia e equipe é sempre obrigatória, sem exceção por experiência." },
+    { q:"A validade máxima de uma PET, mesmo com prorrogação, é de:", opts:["7 dias","24 horas","1 semana","Não tem limite"], c:1, exp:"Depois de 24 horas, uma nova PET precisa ser emitida." }
+  ],
+  maquinas: [
+    { q:"Antes de fazer manutenção numa máquina, é preciso:", opts:["Confiar que o operador desligou","Bloquear e sinalizar todas as fontes de energia","Pedir pra ir mais devagar","Usar luva grossa e seguir normal"], c:1, exp:"O bloqueio formal impede reenergização acidental durante a manutenção." },
+    { q:"Retirar a proteção de segurança de uma máquina para ir mais rápido é:", opts:["Aceitável por poucos minutos","Proibido","Permitido só pra técnicos","Uma boa prática"], c:1, exp:"A proteção deve estar sempre instalada antes de religar o equipamento." },
+    { q:"Uma máquina com protetor de segurança quebrado deve:", opts:["Continuar operando normal","Parar até o reparo","Operar só à noite","Ser usada com mais cuidado"], c:1, exp:"Sem o protetor, o risco de acidente aumenta significativamente." },
+    { q:"A NR-12 trata principalmente de:", opts:["Segurança em máquinas e equipamentos","Trabalho em altura","Espaço confinado","Ergonomia"], c:0, exp:"É a norma de referência para bloqueio, proteções e segurança de máquinas." },
+    { q:"Energia residual numa máquina pode vir de:", opts:["Só da eletricidade","Ar comprimido, mola ou gravidade, entre outras", "Só de baterias","Não existe energia residual"], c:1, exp:"Energias armazenadas em molas, cilindros ou partes suspensas continuam perigosas mesmo desligadas." },
+    { q:"Sistemas de retenção com trava mecânica servem para:", opts:["Decorar a máquina","Impedir queda ou movimento de partes suspensas","Facilitar o transporte","Melhorar a estética"], c:1, exp:"Impedem que uma parte da máquina caia ou se mova sozinha por gravidade." }
+  ],
+  incendio: [
+    { q:"Ao encontrar um princípio de incêndio, o que NÃO se deve fazer?", opts:["Acionar o alarme","Tentar apagar sozinho um incêndio grande, sem treinamento","Avisar os colegas","Usar extintor adequado se souber usar"], c:1, exp:"Incêndios grandes exigem equipe treinada e equipamento adequado." },
+    { q:"As saídas de emergência devem estar sempre:", opts:["Trancadas","Desobstruídas e sinalizadas","Usadas só pela gerência","Fechadas fora do expediente"], c:1, exp:"Uma saída obstruída pode custar vidas em uma emergência real." },
+    { q:"Um extintor de incêndio vencido deve ser:", opts:["Usado normalmente","Recarregado ou substituído","Guardado para emergências","Usado só em treinos"], c:1, exp:"A carga perde eficácia com o tempo — extintor vencido pode falhar quando mais precisar." },
+    { q:"Extintor de CO2 é indicado para incêndio em:", opts:["Papel e madeira","Equipamentos elétricos energizados","Combustíveis líquidos apenas","Nenhum caso específico"], c:1, exp:"O CO2 não conduz eletricidade e não danifica o equipamento." },
+    { q:"Um extintor deve ficar posicionado:", opts:["Trancado num armário","Visível, sinalizado e desobstruído","Só na sala da gerência","Onde sobrar espaço"], c:1, exp:"Em emergência, cada segundo conta — o acesso precisa ser imediato." },
+    { q:"Rota de fuga e ponto de encontro servem para:", opts:["Organizar o estacionamento","Garantir evacuação segura e conferência de todos em emergência","Decorar a planta do prédio","Nenhuma função prática"], c:1, exp:"Permitem saber rapidamente se todos saíram em segurança." }
+  ],
+  ergonomia: [
+    { q:"Carregar peso além do recomendado, sozinho, pode causar principalmente:", opts:["Cansaço passageiro","Lesões na coluna e problemas musculoesqueléticos","Melhora do condicionamento","Nenhum risco"], c:1, exp:"O esforço excessivo é uma das principais causas de afastamento por lesão." },
+    { q:"Pausas durante atividades repetitivas servem para:", opts:["Perder tempo","Reduzir risco de lesão por esforço repetitivo","Deixar o trabalhador desatento","Não têm função real"], c:1, exp:"Recuperam a musculatura e reduzem o acúmulo de esforço." },
+    { q:"Carregar peso próximo ao corpo, em vez de esticado, faz o quê?", opts:["Aumenta o esforço na coluna","Reduz o esforço na coluna","Não faz diferença","Só importa pra objetos leves"], c:1, exp:"Quanto mais afastado o peso, maior a alavanca de força sobre a coluna." },
+    { q:"Ergonomia se preocupa com:", opts:["Só a postura ao sentar","Postura, esforço, repetitividade e organização do trabalho","Só o conforto da cadeira","Só iluminação do escritório"], c:1, exp:"É um conjunto amplo de fatores que afetam saúde e segurança no trabalho." },
+    { q:"Trabalho muito repetitivo sem pausa pode levar a:", opts:["Maior produtividade sem custo","LER/DORT (lesões por esforço repetitivo)","Melhora do condicionamento físico","Nenhum efeito relevante"], c:1, exp:"São lesões cumulativas que se desenvolvem justamente pela falta de pausa e variação." },
+    { q:"Altura inadequada da bancada de trabalho pode causar:", opts:["Nenhum problema relevante","Dores posturais e fadiga muscular","Só desconforto estético","Aumento de produtividade"], c:1, exp:"Uma bancada mal ajustada força posturas inadequadas ao longo do turno." }
+  ],
+  socorros: [
+    { q:"Ao encontrar um colega desmaiado, o primeiro passo é:", opts:["Sacudir com força","Verificar segurança do local e pedir ajuda","Dar água na boca","Levantar a pessoa imediatamente"], c:1, exp:"Garantir a segurança evita uma segunda vítima, e o socorro especializado precisa ser acionado logo." },
+    { q:"Em caso de corte profundo com sangramento, o que fazer primeiro?", opts:["Aplicar pressão direta com pano limpo","Deixar sangrar pra limpar","Colocar terra no ferimento","Ignorar se não doer"], c:0, exp:"A pressão direta ajuda a estancar o sangramento até o socorro chegar." },
+    { q:"Primeiros socorros substituem o atendimento médico?", opts:["Sim, sempre","Não — são cuidados imediatos até o atendimento chegar","Só em casos leves","Depende da empresa"], c:1, exp:"São uma ponte até o atendimento especializado, não um substituto dele." },
+    { q:"Em caso de queimadura leve, o recomendado é:", opts:["Passar manteiga ou pasta de dente","Resfriar com água corrente em temperatura ambiente","Estourar bolhas imediatamente","Ignorar e continuar trabalhando"], c:1, exp:"Água corrente ajuda a reduzir o dano térmico; produtos caseiros podem piorar a lesão." },
+    { q:"Ao suspeitar de fratura, o correto é:", opts:["Tentar realinhar o membro","Imobilizar e aguardar socorro especializado","Massagear o local","Pedir pra pessoa se movimentar"], c:1, exp:"Mexer no local pode agravar a lesão — o ideal é imobilizar e aguardar ajuda." },
+    { q:"Antes de socorrer alguém em um espaço com risco (elétrico, gás etc.), o primeiro passo é:", opts:["Entrar rápido pra tirar a pessoa","Garantir que o ambiente está seguro para você também","Gritar por ajuda e esperar parado","Nenhuma das anteriores"], c:1, exp:"Socorrista sem preparo pode se tornar a segunda vítima — segurança em primeiro lugar, sempre." }
+  ],
+  geral: [
+    { q:"DDS significa:", opts:["Diálogo Diário de Segurança","Documento de Direitos Sociais","Departamento de Segurança","Nenhuma das anteriores"], c:0, exp:"É a conversa rápida no início do turno sobre riscos e cuidados do dia." },
+    { q:"O PGR substituiu qual antigo programa?", opts:["PCMSO","PPRA","CIPA","NR-12"], c:1, exp:"O Programa de Gerenciamento de Riscos substituiu o antigo PPRA." },
+    { q:"Todo acidente de trabalho, mesmo sem afastamento, deve ser:", opts:["Ignorado se for leve","Registrado e comunicado","Resolvido informalmente","Escondido da empresa"], c:1, exp:"O registro é importante para prevenção e para os direitos do trabalhador." },
+    { q:"Um trabalhador pode recusar uma atividade com risco grave e iminente?", opts:["Não, nunca","Sim, é um direito garantido","Só com autorização do sindicato","Só se for gerente"], c:1, exp:"É a chamada recusa de trabalho perigoso, um direito do trabalhador." },
+    { q:"A CIPA tem como função principal:", opts:["Organizar eventos da empresa","Prevenir acidentes e doenças do trabalho","Fiscalizar o RH","Nenhuma função prática"], c:1, exp:"É a Comissão Interna de Prevenção de Acidentes (e Assédio)." },
+    { q:"Sinalização de segurança serve principalmente para:", opts:["Decorar o ambiente","Alertar sobre riscos e orientar comportamentos seguros","Indicar a hora do almoço","Nenhuma função real"], c:1, exp:"Comunica riscos e instruções de forma rápida e universal." }
+  ]
+};
+
+let currentCat = null;
+let usedQuestions = {};
+
+function buildWheel(){
+  const wheel = document.getElementById('wheel');
+  const n = CATEGORIES.length;
+  const slice = 360/n;
+  CATEGORIES.forEach((cat,i)=>{
+    const seg = document.createElement('div');
+    seg.className = 'seg';
+    const rotate = slice*i;
+    seg.style.transform = `rotate(${rotate}deg) skewY(${90-slice}deg)`;
+    seg.style.background = cat.color;
+    seg.innerHTML = `<span style="transform:skewY(${-(90-slice)}deg) rotate(${slice/2}deg);">${cat.icon} ${cat.label}</span>`;
+    wheel.appendChild(seg);
+  });
+}
+buildWheel();
+
+let rotationAccum = 0;
+document.getElementById('spinBtn').addEventListener('click', ()=>{
+  document.getElementById('spinBtn').disabled = true;
+  document.getElementById('resultCard').classList.remove('show');
+
+  const n = CATEGORIES.length;
+  const slice = 360/n;
+  const targetIndex = Math.floor(Math.random()*n);
+  // ângulo para o centro da fatia sorteada ficar no ponteiro (topo)
+  const targetAngle = 360 - (targetIndex*slice + slice/2);
+  const spins = 5; // voltas completas antes de parar
+  rotationAccum += spins*360 + ((targetAngle - (rotationAccum % 360)) + 360) % 360;
+
+  const wheel = document.getElementById('wheel');
+  wheel.style.transform = `rotate(${rotationAccum}deg)`;
+
+  setTimeout(()=>{
+    currentCat = CATEGORIES[targetIndex];
+    showQuestion(currentCat);
+    document.getElementById('spinBtn').disabled = false;
+  }, 3300);
+});
+
+function showQuestion(cat){
+  if(!usedQuestions[cat.id]) usedQuestions[cat.id] = shuffleIdx(QUESTIONS[cat.id].length);
+  if(usedQuestions[cat.id].length === 0) usedQuestions[cat.id] = shuffleIdx(QUESTIONS[cat.id].length);
+  const qIdx = usedQuestions[cat.id].pop();
+  const item = QUESTIONS[cat.id][qIdx];
+
+  const card = document.getElementById('resultCard');
+  const tag = document.getElementById('catTag');
+  tag.textContent = `${cat.icon} ${cat.label}`;
+  tag.style.background = cat.color;
+  document.getElementById('qText').textContent = item.q;
+
+  const letters = ['A','B','C','D'];
+  const optsEl = document.getElementById('options');
+  optsEl.innerHTML = item.opts.map((o,i)=>
+    `<div class="opt" data-correct="${i===item.c}"><b>${letters[i]})</b> ${o}</div>`
+  ).join('');
+
+  document.getElementById('expBox').classList.remove('show');
+  document.getElementById('expBox').textContent = item.exp;
+  document.getElementById('revealBtn').style.display = '';
+  card.classList.add('show');
+
+  document.getElementById('revealBtn').onclick = ()=>{
+    document.querySelectorAll('.opt').forEach(o=>{
+      if(o.dataset.correct === 'true') o.classList.add('correct');
+    });
+    document.getElementById('expBox').classList.add('show');
+    document.getElementById('revealBtn').style.display = 'none';
+  };
+}
+
+function shuffleIdx(len){
+  const a = Array.from({length:len}, (_,i)=>i);
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+</script>
+</body>
+</html>

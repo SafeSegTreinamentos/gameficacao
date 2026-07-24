@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Verdadeiro ou Falso Relâmpago | SafeSeg</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --amber:#F59E0B; --graphite:#14171B; --graphite-2:#1E2228; --graphite-3:#2A2F37;
+    --danger:#D9291C; --ok:#2E9B4F; --paper:#F4F1E9;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{margin:0; background:radial-gradient(1200px 600px at 10% -10%, #23272f 0%, transparent 60%), var(--graphite); color:var(--paper); font-family:'Inter',sans-serif; min-height:100vh;}
+  .hazard{height:10px; background:repeating-linear-gradient(135deg,var(--amber) 0 22px,var(--graphite) 22px 44px);}
+  header{padding:22px 20px 16px; text-align:center; border-bottom:1px solid var(--graphite-3);}
+  .eyebrow{font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:var(--amber); font-weight:700; margin-bottom:6px;}
+  h1{font-family:'Bebas Neue'; font-size:clamp(32px,8vw,50px); margin:0; color:#fff; letter-spacing:.02em; line-height:.95;}
+  h1 span{color:var(--amber);}
+  .sub{color:#9AA1AC; font-size:14px; margin-top:8px; max-width:520px; margin:8px auto 0;}
+  main{max-width:640px; margin:0 auto; padding:20px 16px 60px;}
+  a.back{display:inline-block; margin-top:14px; font-size:12px; color:#8A909B; text-decoration:underline;}
+
+  .btn{display:block; width:100%; border:none; border-radius:10px; padding:15px; font-family:'Bebas Neue'; font-size:18px; letter-spacing:.05em; cursor:pointer;}
+  .btn:active{transform:scale(.98);}
+  .btn-amber{background:var(--amber); color:#1a1200;}
+  .btn-ghost{background:transparent; border:1px solid var(--graphite-3); color:#9AA1AC;}
+
+  .startScreen{text-align:center; background:var(--graphite-2); border:1px solid var(--graphite-3); border-radius:16px; padding:34px 20px; margin-top:20px;}
+  .startScreen .ic{font-size:48px; margin-bottom:10px;}
+  .startScreen h2{font-family:'Bebas Neue'; font-size:26px; color:#fff; margin:0 0 10px;}
+  .startScreen p{font-size:14px; color:#B7BCC4; line-height:1.6; max-width:420px; margin:0 auto 22px;}
+
+  .hud{display:flex; gap:10px; margin:20px 0 16px;}
+  .hudBox{flex:1; background:var(--graphite-2); border:1px solid var(--graphite-3); border-radius:12px; padding:12px; text-align:center;}
+  .hudBox .label{font-size:10px; color:#8A909B; text-transform:uppercase; letter-spacing:.08em;}
+  .hudBox b{display:block; font-family:'Bebas Neue'; font-size:26px; color:var(--amber);}
+  .survivorCtrl{display:flex; align-items:center; justify-content:center; gap:10px;}
+  .survivorCtrl button{width:30px; height:30px; border-radius:8px; border:none; background:var(--graphite-3); color:#fff; font-size:16px; cursor:pointer;}
+
+  .card{background:var(--graphite-2); border:1px solid var(--graphite-3); border-radius:18px; padding:34px 24px; text-align:center; min-height:180px; display:flex; align-items:center; justify-content:center;}
+  .card p{font-size:22px; line-height:1.4; color:#fff; font-weight:700; margin:0;}
+
+  .revealBtn{margin-top:18px;}
+
+  .answerBanner{
+    display:none; margin-top:18px; border-radius:14px; padding:20px; text-align:center;
+  }
+  .answerBanner.show{display:block; animation:pop .3s ease;}
+  @keyframes pop{0%{transform:scale(.85); opacity:0;}100%{transform:scale(1); opacity:1;}}
+  .answerBanner.true{background:rgba(46,155,79,.15); border:2px solid var(--ok);}
+  .answerBanner.false{background:rgba(217,41,28,.15); border:2px solid var(--danger);}
+  .answerBanner .tag{font-family:'Bebas Neue'; font-size:32px; letter-spacing:.05em;}
+  .answerBanner.true .tag{color:var(--ok);}
+  .answerBanner.false .tag{color:var(--danger);}
+  .answerBanner .exp{font-size:13.5px; color:#C8CDD5; margin-top:10px; line-height:1.5;}
+
+  .nextWrap{margin-top:18px; display:none;}
+  .nextWrap.show{display:block;}
+
+  .end{display:none; text-align:center; background:var(--graphite-2); border:1px solid var(--amber); border-radius:16px; padding:30px 20px; margin-top:20px;}
+  .end.show{display:block;}
+  .end .ic{font-size:56px; margin-bottom:8px;}
+  .end h2{font-family:'Bebas Neue'; font-size:28px; color:#fff; margin:0 0 8px;}
+  .end p{color:#B7BCC4; font-size:14px; line-height:1.6; max-width:400px; margin:0 auto 20px;}
+
+  footer{text-align:center; padding:24px 16px 40px; color:#5B616C; font-size:11.5px; letter-spacing:.04em;}
+  .logo{font-family:'Bebas Neue'; color:#8A909B; letter-spacing:.06em;}
+  .logo b{color:var(--amber);}
+</style>
+</head>
+<body>
+<div class="hazard"></div>
+<header>
+  <div class="eyebrow">SafeSeg · Segurança do Trabalho</div>
+  <h1>VERDADEIRO OU <span>FALSO</span><br>RELÂMPAGO</h1>
+  <div class="sub">Todo mundo em pé. Você lê a afirmação em voz alta — quem errar, senta. O último de pé vence.</div>
+  <a class="back" href="index.html">← voltar para as dinâmicas</a>
+</header>
+
+<main>
+  <div class="startScreen" id="startScreen">
+    <div class="ic">⚡</div>
+    <h2>Pronto pra começar?</h2>
+    <p>40 afirmações embaralhadas sobre segurança do trabalho. Leia em voz alta, deixe todo mundo responder verdadeiro ou falso (voto físico: em pé = verdadeiro, agachado = falso, por exemplo), depois toque em revelar.</p>
+    <button class="btn btn-amber" id="startBtn">▶ COMEÇAR</button>
+  </div>
+
+  <div id="gameArea" style="display:none;">
+    <div class="hud">
+      <div class="hudBox"><span class="label">Rodada</span><b id="hudRound">1/40</b></div>
+      <div class="hudBox">
+        <span class="label">Sobreviventes</span>
+        <div class="survivorCtrl">
+          <button id="survMinus">−</button>
+          <b id="survCount">20</b>
+          <button id="survPlus">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card"><p id="statementText"></p></div>
+
+    <div class="revealBtn">
+      <button class="btn btn-amber" id="revealBtn">🔎 REVELAR RESPOSTA</button>
+    </div>
+
+    <div class="answerBanner" id="answerBanner">
+      <div class="tag" id="answerTag"></div>
+      <div class="exp" id="answerExp"></div>
+    </div>
+
+    <div class="nextWrap" id="nextWrap">
+      <button class="btn btn-amber" id="nextBtn">PRÓXIMA AFIRMAÇÃO →</button>
+    </div>
+  </div>
+
+  <div class="end" id="endScreen">
+    <div class="ic">🏆</div>
+    <h2>FIM DA RODADA!</h2>
+    <p>Sobreviventes finais: <b id="finalSurvivors" style="color:var(--amber);">0</b>. Quem ainda está de pé, é campeão da segurança de hoje.</p>
+    <button class="btn btn-amber" id="restartBtn">JOGAR DE NOVO</button>
+  </div>
+</main>
+
+<footer>
+  <div class="logo">Safe<b>Seg</b> Segurança do Trabalho</div>
+  Segurança é o caminho de volta pra casa.
+</footer>
+
+<script>
+const STATEMENTS = [
+  { s:"O uso de capacete de segurança é obrigatório apenas em áreas de risco elétrico.", v:false, exp:"É obrigatório em qualquer área com risco de queda de objetos ou impacto na cabeça, não só risco elétrico." },
+  { s:"Antes de destravar o bloqueio de um equipamento, é preciso confirmar que todos os envolvidos já terminaram o serviço.", v:true, exp:"Religar sem confirmar pode colocar em risco quem ainda está trabalhando no equipamento." },
+  { s:"Trabalho em altura só é considerado a partir de 3 metros do nível inferior.", v:false, exp:"A NR-35 considera trabalho em altura a partir de 2 metros." },
+  { s:"A etiqueta de bloqueio (LOTO) só pode ser removida pela pessoa que a colocou.", v:true, exp:"Essa é a regra básica do bloqueio individual — garante que só quem bloqueou autoriza a reenergização." },
+  { s:"Um extintor tipo ABC pode ser usado tanto em incêndio elétrico quanto em líquidos inflamáveis.", v:true, exp:"O extintor ABC cobre as três classes principais de incêndio." },
+  { s:"Espaço confinado é definido apenas por espaços muito pequenos, como tubulações.", v:false, exp:"A definição envolve ventilação insuficiente e risco de atmosfera perigosa, não só o tamanho do espaço." },
+  { s:"O vigia de um espaço confinado pode entrar no local rapidamente para ajudar, se for necessário.", v:false, exp:"O vigia deve permanecer sempre do lado de fora, monitorando continuamente." },
+  { s:"Uma PET vencida pode continuar sendo usada até o fim do turno, se a atividade já tiver começado.", v:false, exp:"A PET tem validade definida — vencida, o trabalho deve parar até emitir uma nova." },
+  { s:"Carregar peso próximo ao corpo reduz o risco de lesão na coluna.", v:true, exp:"Quanto mais afastado o peso do corpo, maior a força sobre a coluna." },
+  { s:"Pausas durante atividades repetitivas aumentam o risco de acidentes.", v:false, exp:"Pausas reduzem o risco de lesões por esforço repetitivo." },
+  { s:"Todo trabalhador tem o direito de recusar uma atividade que ofereça risco grave e iminente.", v:true, exp:"Esse é um direito garantido — a chamada recusa de trabalho perigoso." },
+  { s:"EPI vencido pode ser usado se estiver em boas condições visuais.", v:false, exp:"A validade deve ser respeitada independente da aparência do equipamento." },
+  { s:"A placa amarela com ponto de exclamação preto indica especificamente risco de choque elétrico.", v:false, exp:"Essa sinalização indica perigo/atenção geral; risco elétrico tem sinalização própria." },
+  { s:"Antes de tocar num equipamento elétrico já desligado, é preciso testar a ausência de tensão.", v:true, exp:"Desligar não garante ausência de energia residual ou erro de identificação do circuito." },
+  { s:"Cilindros hidráulicos e pneumáticos podem manter energia armazenada mesmo com o sistema elétrico desligado.", v:true, exp:"Pressão residual é uma energia perigosa independente da parte elétrica." },
+  { s:"Um extintor de incêndio deve ficar sempre trancado para evitar uso indevido.", v:false, exp:"Extintores devem estar sempre acessíveis e desobstruídos, nunca trancados." },
+  { s:"A CIPA só é obrigatória em empresas com mais de 500 funcionários.", v:false, exp:"A obrigatoriedade depende do grau de risco e do número de empregados, e é bem menor que 500 na maioria dos casos." },
+  { s:"O PGR substituiu o antigo PPRA.", v:true, exp:"O Programa de Gerenciamento de Riscos substituiu o Programa de Prevenção de Riscos Ambientais." },
+  { s:"Trabalhar sozinho em espaço confinado é permitido se o trabalhador for muito experiente.", v:false, exp:"Nunca se trabalha sozinho em espaço confinado, independente da experiência." },
+  { s:"Escadas portáteis podem ser usadas como plataforma de trabalho por longos períodos.", v:false, exp:"Escadas são para acesso rápido, não para permanência prolongada como plataforma." },
+  { s:"Ruído acima do limite de tolerância pode causar perda auditiva mesmo sem dor imediata.", v:true, exp:"A perda auditiva ocupacional costuma ser progressiva e indolor." },
+  { s:"Luvas de proteção servem igualmente para qualquer tipo de risco químico.", v:false, exp:"Cada luva é especificada para um tipo de risco/material — não existe luva universal." },
+  { s:"O cinto de segurança tipo paraquedista deve ser conectado num ponto de ancoragem certificado.", v:true, exp:"Um ponto de ancoragem inadequado pode não suportar a carga em caso de queda." },
+  { s:"É seguro reenergizar um equipamento assim que o serviço visualmente parecer concluído.", v:false, exp:"É preciso seguir o procedimento formal de reenergização, não uma avaliação visual." },
+  { s:"Um trabalhador pode ser dispensado do uso de EPI se alegar desconforto.", v:false, exp:"O uso do EPI é obrigatório quando há risco — desconforto deve ser resolvido com ajuste ou troca, não dispensa." },
+  { s:"Máquinas com o protetor de segurança retirado podem operar em velocidade reduzida.", v:false, exp:"Sem o protetor, a máquina não deve operar, independente da velocidade." },
+  { s:"DDS significa Diálogo Diário de Segurança.", v:true, exp:"É a conversa rápida no início do turno sobre riscos e cuidados do dia." },
+  { s:"A NR-12 trata especificamente de segurança em máquinas e equipamentos.", v:true, exp:"É a norma de referência para bloqueio, proteções e segurança de máquinas." },
+  { s:"Gases mais pesados que o ar tendem a se acumular na parte de baixo de um espaço confinado.", v:true, exp:"Isso é especialmente perigoso em poços e tanques, onde o gás fica retido no fundo." },
+  { s:"Primeiros socorros substituem a necessidade de atendimento médico.", v:false, exp:"Primeiros socorros são cuidados imediatos até a chegada do atendimento médico especializado." },
+  { s:"Aterramento temporário é uma etapa opcional na desenergização elétrica.", v:false, exp:"É uma etapa obrigatória prevista na NR-10 para instalações elétricas." },
+  { s:"A validade de uma PET pode ultrapassar 24 horas, mesmo com prorrogação.", v:false, exp:"O limite é de 24 horas, mesmo somando prorrogações." },
+  { s:"Um trabalhador com treinamento de NR-35 pode trabalhar em qualquer altura sem restrição adicional.", v:false, exp:"Ainda depende da análise de risco e das condições específicas de cada atividade." },
+  { s:"Extintores de CO2 são indicados para incêndios em equipamentos elétricos energizados.", v:true, exp:"O CO2 não conduz eletricidade e não deixa resíduo no equipamento." },
+  { s:"O uso de celular durante a operação de máquinas é seguro se for rápido.", v:false, exp:"Qualquer distração durante a operação de máquinas aumenta o risco de acidente." },
+  { s:"Sinalização de emergência deve ser visível mesmo com a iluminação normal desligada.", v:true, exp:"Por isso costuma ser fotoluminescente ou ter iluminação própria de emergência." },
+  { s:"O supervisor de entrada é responsável por autorizar a emissão da PET.", v:true, exp:"É uma das principais responsabilidades formais do supervisor de entrada." },
+  { s:"Todo acidente de trabalho, mesmo sem afastamento, deve ser registrado.", v:true, exp:"Todo acidente deve ser registrado e comunicado, independente da gravidade." },
+  { s:"Uma etiqueta de bloqueio pode ser retirada por qualquer supervisor em caso de urgência.", v:false, exp:"Só quem colocou o bloqueio (ou um procedimento formal específico) pode retirá-lo." },
+  { s:"Ergonomia trata apenas da postura ao sentar.", v:false, exp:"Ergonomia envolve postura, esforço, repetitividade, ambiente e organização do trabalho como um todo." }
+];
+
+let order = [];
+let idx = 0;
+let survivors = 20;
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function renderCard(){
+  const item = STATEMENTS[order[idx]];
+  document.getElementById('statementText').textContent = item.s;
+  document.getElementById('hudRound').textContent = `${idx+1}/${STATEMENTS.length}`;
+  document.getElementById('answerBanner').classList.remove('show');
+  document.getElementById('nextWrap').classList.remove('show');
+  document.getElementById('revealBtn').style.display = '';
+}
+
+document.getElementById('revealBtn').addEventListener('click', ()=>{
+  const item = STATEMENTS[order[idx]];
+  const banner = document.getElementById('answerBanner');
+  banner.className = 'answerBanner show ' + (item.v ? 'true' : 'false');
+  document.getElementById('answerTag').textContent = item.v ? '✅ VERDADEIRO' : '❌ FALSO';
+  document.getElementById('answerExp').textContent = item.exp;
+  document.getElementById('revealBtn').style.display = 'none';
+  document.getElementById('nextWrap').classList.add('show');
+});
+
+document.getElementById('nextBtn').addEventListener('click', ()=>{
+  idx++;
+  if(idx >= STATEMENTS.length){
+    document.getElementById('gameArea').style.display = 'none';
+    document.getElementById('finalSurvivors').textContent = survivors;
+    document.getElementById('endScreen').classList.add('show');
+  } else {
+    renderCard();
+  }
+});
+
+document.getElementById('survMinus').addEventListener('click', ()=>{
+  survivors = Math.max(0, survivors-1);
+  document.getElementById('survCount').textContent = survivors;
+});
+document.getElementById('survPlus').addEventListener('click', ()=>{
+  survivors++;
+  document.getElementById('survCount').textContent = survivors;
+});
+
+function startGame(){
+  order = shuffle(STATEMENTS.map((_,i)=>i));
+  idx = 0;
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('endScreen').classList.remove('show');
+  document.getElementById('gameArea').style.display = '';
+  renderCard();
+}
+
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('restartBtn').addEventListener('click', ()=>{
+  document.getElementById('endScreen').classList.remove('show');
+  document.getElementById('startScreen').style.display = '';
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Bingo da Segurança | SafeSeg</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --amber:#F59E0B; --graphite:#14171B; --graphite-2:#1E2228; --graphite-3:#2A2F37;
+    --danger:#D9291C; --ok:#2E9B4F; --paper:#F4F1E9;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{margin:0; background:radial-gradient(1200px 600px at 10% -10%, #23272f 0%, transparent 60%), var(--graphite); color:var(--paper); font-family:'Inter',sans-serif; min-height:100vh;}
+  .hazard{height:10px; background:repeating-linear-gradient(135deg,var(--amber) 0 22px,var(--graphite) 22px 44px);}
+  header{padding:22px 20px 16px; text-align:center; border-bottom:1px solid var(--graphite-3);}
+  .eyebrow{font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:var(--amber); font-weight:700; margin-bottom:6px;}
+  h1{font-family:'Bebas Neue'; font-size:clamp(32px,8vw,50px); margin:0; color:#fff; letter-spacing:.02em; line-height:.95;}
+  h1 span{color:var(--amber);}
+  .sub{color:#9AA1AC; font-size:14px; margin-top:8px; max-width:520px; margin:8px auto 0;}
+  main{max-width:720px; margin:0 auto; padding:20px 16px 60px;}
+  a.back{display:inline-block; margin-top:14px; font-size:12px; color:#8A909B; text-decoration:underline;}
+
+  .tabs{display:flex; gap:8px; margin-bottom:18px;}
+  .tab{
+    flex:1; text-align:center; padding:12px; border-radius:10px; background:var(--graphite-2);
+    border:1px solid var(--graphite-3); font-family:'Bebas Neue'; font-size:15px; color:#9AA1AC; cursor:pointer; letter-spacing:.03em;
+  }
+  .tab.active{border-color:var(--amber); color:var(--amber); background:rgba(245,158,11,.08);}
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  .btn{display:block; width:100%; border:none; border-radius:10px; padding:14px; font-family:'Bebas Neue'; font-size:16px; letter-spacing:.05em; cursor:pointer;}
+  .btn:active{transform:scale(.98);}
+  .btn-amber{background:var(--amber); color:#1a1200;}
+  .btn-ghost{background:transparent; border:1px solid var(--graphite-3); color:#9AA1AC;}
+
+  /* --- SORTEIO --- */
+  .drawCard{background:var(--graphite-2); border:1px solid var(--graphite-3); border-radius:16px; padding:26px 20px; text-align:center; margin-bottom:16px; min-height:150px; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .drawCard .term{font-family:'Bebas Neue'; font-size:30px; color:var(--amber); letter-spacing:.03em; margin-bottom:8px;}
+  .drawCard .def{font-size:13.5px; color:#C8CDD5; line-height:1.5;}
+  .drawCard .placeholder{color:#5B616C; font-size:14px;}
+
+  .drawnList{display:flex; flex-wrap:wrap; gap:6px; margin:14px 0 18px;}
+  .drawnList span{background:var(--graphite-3); border-radius:999px; padding:5px 11px; font-size:11.5px; color:#C8CDD5;}
+  .counter{text-align:center; font-size:12px; color:#8A909B; margin-bottom:14px;}
+
+  /* --- CARTELAS --- */
+  .cardControls{display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap;}
+  .cardControls label{font-size:13px; color:#9AA1AC;}
+  .cardControls input{
+    width:70px; background:var(--graphite-3); border:1px solid #3A4048; border-radius:8px; color:#fff; padding:8px 10px; font-size:14px;
+  }
+  .printArea{background:#fff; border-radius:10px; padding:10px;}
+  .bingoCard{
+    width:280px; margin:0 auto 22px; background:#fff; border:2px solid #14171B; border-radius:8px; overflow:hidden;
+    break-inside:avoid; page-break-inside:avoid;
+  }
+  .bingoCard .cardHead{background:#14171B; color:#F59E0B; text-align:center; font-family:'Bebas Neue'; font-size:20px; padding:8px 0; letter-spacing:.06em;}
+  .bingoCard table{width:100%; border-collapse:collapse;}
+  .bingoCard td{
+    border:1px solid #ccc; width:20%; height:56px; text-align:center; vertical-align:middle;
+    font-size:9.5px; color:#111; padding:3px; line-height:1.15; font-family:'Inter',sans-serif;
+  }
+  .bingoCard td.free{background:#14171B; color:#F59E0B; font-family:'Bebas Neue'; font-size:14px;}
+  .cardsGrid{display:flex; flex-wrap:wrap; gap:16px; justify-content:center;}
+
+  @media print{
+    body *{visibility:hidden;}
+    .printArea, .printArea *{visibility:visible;}
+    .printArea{position:absolute; top:0; left:0; width:100%;}
+  }
+
+  footer{text-align:center; padding:24px 16px 40px; color:#5B616C; font-size:11.5px; letter-spacing:.04em;}
+  .logo{font-family:'Bebas Neue'; color:#8A909B; letter-spacing:.06em;}
+  .logo b{color:var(--amber);}
+</style>
+</head>
+<body>
+<div class="hazard"></div>
+<header>
+  <div class="eyebrow">SafeSeg · Segurança do Trabalho</div>
+  <h1>BINGO DA <span>SEGURANÇA</span></h1>
+  <div class="sub">Gere cartelas pra imprimir e use o sorteio digital pra conduzir o jogo com a turma toda.</div>
+  <a class="back" href="index.html">← voltar para as dinâmicas</a>
+</header>
+
+<main>
+  <div class="tabs">
+    <div class="tab active" data-tab="sorteio">🎙️ SORTEIO</div>
+    <div class="tab" data-tab="cartelas">🖨️ CARTELAS</div>
+  </div>
+
+  <div class="panel active" id="panel-sorteio">
+    <div class="drawCard" id="drawCard">
+      <div class="placeholder">Toque em "Sortear termo" pra começar</div>
+    </div>
+    <div class="counter" id="counter">0 de 30 termos sorteados</div>
+    <div class="drawnList" id="drawnList"></div>
+    <button class="btn btn-amber" id="drawBtn">🎙️ SORTEAR TERMO</button>
+    <button class="btn btn-ghost" id="resetDrawBtn" style="margin-top:10px;">REINICIAR SORTEIO</button>
+  </div>
+
+  <div class="panel" id="panel-cartelas">
+    <div class="cardControls">
+      <label>Quantas cartelas gerar:</label>
+      <input type="number" id="cardCount" value="10" min="1" max="60">
+      <button class="btn btn-amber" id="genCardsBtn" style="width:auto; padding:10px 18px;">GERAR</button>
+      <button class="btn btn-ghost" id="printCardsBtn" style="width:auto; padding:10px 18px;">🖨️ IMPRIMIR</button>
+    </div>
+    <div class="printArea">
+      <div class="cardsGrid" id="cardsGrid"></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="logo">Safe<b>Seg</b> Segurança do Trabalho</div>
+  Segurança é o caminho de volta pra casa.
+</footer>
+
+<script>
+const TERMS = [
+  { t:"CAPACETE", d:"EPI que protege a cabeça contra impacto e queda de objetos." },
+  { t:"BLOQUEIO", d:"Ação de impedir que uma máquina ou circuito seja religado durante manutenção." },
+  { t:"ATERRAMENTO", d:"Conexão que neutraliza energia residual ou induzida num circuito elétrico." },
+  { t:"VIGIA", d:"Pessoa que fica do lado de fora monitorando um espaço confinado." },
+  { t:"EXTINTOR", d:"Equipamento usado para combater princípios de incêndio." },
+  { t:"ERGONOMIA", d:"Estudo da adaptação do trabalho às condições do ser humano." },
+  { t:"ANCORAGEM", d:"Ponto certificado onde se conecta o cinto de segurança em altura." },
+  { t:"EPI", d:"Sigla para Equipamento de Proteção Individual." },
+  { t:"SINALIZAÇÃO", d:"Conjunto de placas e avisos que alertam sobre riscos." },
+  { t:"INCÊNDIO", d:"Fogo fora de controle que exige combate imediato." },
+  { t:"RESGATE", d:"Ação de retirar com segurança uma vítima de um ambiente de risco." },
+  { t:"MÁSCARA", d:"EPI que protege as vias respiratórias." },
+  { t:"CINTO", d:"EPI que impede queda em trabalho em altura." },
+  { t:"CHOQUE", d:"Passagem de corrente elétrica pelo corpo humano." },
+  { t:"PET", d:"Sigla para Permissão de Entrada e Trabalho." },
+  { t:"CIPA", d:"Comissão interna que trata da prevenção de acidentes." },
+  { t:"LUVA", d:"EPI usado para proteger as mãos." },
+  { t:"ACIDENTE", d:"Evento indesejado que causa dano a pessoas, bens ou ao ambiente." },
+  { t:"ANDAIME", d:"Estrutura temporária usada para trabalho em altura." },
+  { t:"DDS", d:"Diálogo Diário de Segurança, feito no início do turno." },
+  { t:"PGR", d:"Programa de Gerenciamento de Riscos." },
+  { t:"NR-10", d:"Norma que trata de segurança em instalações e serviços com eletricidade." },
+  { t:"NR-12", d:"Norma que trata de segurança em máquinas e equipamentos." },
+  { t:"NR-33", d:"Norma que trata de segurança em espaços confinados." },
+  { t:"NR-35", d:"Norma que trata de trabalho em altura." },
+  { t:"BOTINA", d:"EPI que protege os pés contra impacto e perfuração." },
+  { t:"PROTETOR AURICULAR", d:"EPI usado para reduzir exposição a ruído excessivo." },
+  { t:"ESCADA", d:"Equipamento de acesso rápido, não deve virar plataforma de trabalho." },
+  { t:"ATMOSFERA", d:"Composição do ar de um ambiente, testada antes de entrar em espaço confinado." },
+  { t:"SUPERVISOR", d:"Responsável por autorizar e emitir a Permissão de Entrada e Trabalho." }
+];
+
+let drawnOrder = [];
+let drawnCount = 0;
+
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
+  });
+});
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function resetDraw(){
+  drawnOrder = shuffle(TERMS.map((_,i)=>i));
+  drawnCount = 0;
+  document.getElementById('drawnList').innerHTML = '';
+  document.getElementById('counter').textContent = `0 de ${TERMS.length} termos sorteados`;
+  document.getElementById('drawCard').innerHTML = '<div class="placeholder">Toque em "Sortear termo" pra começar</div>';
+}
+resetDraw();
+
+document.getElementById('drawBtn').addEventListener('click', ()=>{
+  if(drawnCount >= TERMS.length){
+    document.getElementById('drawCard').innerHTML = '<div class="placeholder">Todos os termos já foram sorteados! Reinicie pra jogar de novo.</div>';
+    return;
+  }
+  const item = TERMS[drawnOrder[drawnCount]];
+  drawnCount++;
+  document.getElementById('drawCard').innerHTML = `<div class="term">${item.t}</div><div class="def">${item.d}</div>`;
+  document.getElementById('counter').textContent = `${drawnCount} de ${TERMS.length} termos sorteados`;
+  const list = document.getElementById('drawnList');
+  const chip = document.createElement('span');
+  chip.textContent = item.t;
+  list.appendChild(chip);
+});
+
+document.getElementById('resetDrawBtn').addEventListener('click', resetDraw);
+
+// --- CARTELAS ---
+function generateCard(){
+  const picked = shuffle(TERMS.map((_,i)=>i)).slice(0,24);
+  picked.splice(12, 0, -1); // FREE no centro (índice 12 de 25 células)
+  let html = '<table>';
+  for(let r=0;r<5;r++){
+    html += '<tr>';
+    for(let c=0;c<5;c++){
+      const idx = r*5+c;
+      if(picked[idx] === -1){
+        html += '<td class="free">★<br>LIVRE</td>';
+      } else {
+        html += `<td>${TERMS[picked[idx]].t}</td>`;
+      }
+    }
+    html += '</tr>';
+  }
+  html += '</table>';
+  return html;
+}
+
+document.getElementById('genCardsBtn').addEventListener('click', ()=>{
+  const n = Math.min(60, Math.max(1, parseInt(document.getElementById('cardCount').value) || 1));
+  const grid = document.getElementById('cardsGrid');
+  grid.innerHTML = '';
+  for(let i=0;i<n;i++){
+    const card = document.createElement('div');
+    card.className = 'bingoCard';
+    card.innerHTML = `<div class="cardHead">BINGO SAFESEG · Nº ${String(i+1).padStart(2,'0')}</div>${generateCard()}`;
+    grid.appendChild(card);
+  }
+});
+document.getElementById('genCardsBtn').click();
+
+document.getElementById('printCardsBtn').addEventListener('click', ()=>window.print());
+</script>
+</body>
+</html>
