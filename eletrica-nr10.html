@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Dinâmica — Elétrica (NR-10) | SafeSeg</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --amber:#F59E0B;
+    --amber-dark:#B97400;
+    --graphite:#14171B;
+    --graphite-2:#1E2228;
+    --graphite-3:#2A2F37;
+    --danger:#D9291C;
+    --danger-dark:#8F1610;
+    --ok:#2E9B4F;
+    --paper:#F4F1E9;
+    --c1:#2D6CDF; /* etapa 1 - azul */
+    --c2:#3C9F5F; /* etapa 2 - verde */
+    --c3:#E8792B; /* etapa 3 - laranja */
+    --c4:#5B3E97; /* etapa 4 - roxo */
+    --c5:#2E9CB8; /* etapa 5 - teal */
+    --c6:#B23A6B; /* etapa 6 - magenta */
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 10% -10%, #23272f 0%, transparent 60%),
+      var(--graphite);
+    color:var(--paper);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .hazard{
+    height:10px;
+    background:repeating-linear-gradient(135deg,var(--amber) 0 22px,var(--graphite) 22px 44px);
+  }
+  header{
+    padding:22px 20px 18px;
+    text-align:center;
+    position:relative;
+    border-bottom:1px solid var(--graphite-3);
+  }
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color:var(--amber);
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  h1{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(36px,9vw,58px);
+    letter-spacing:.02em;
+    margin:0;
+    line-height:.95;
+    color:#fff;
+  }
+  h1 span{color:var(--amber);}
+  .sub{
+    color:#9AA1AC;
+    font-size:14px;
+    margin-top:8px;
+    max-width:520px;
+    margin-left:auto;
+    margin-right:auto;
+  }
+  main{
+    max-width:640px;
+    margin:0 auto;
+    padding:22px 16px 60px;
+  }
+
+  /* ---- HUD ---- */
+  .hud{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:var(--graphite-2);
+    border:1px solid var(--graphite-3);
+    border-radius:14px;
+    padding:12px 16px;
+    margin-bottom:20px;
+    font-size:13px;
+  }
+  .hud b{color:var(--amber); font-family:'Bebas Neue'; font-size:20px; letter-spacing:.03em;}
+  .hud .item{text-align:center;}
+  .hud .label{display:block; color:#8A909B; font-size:10px; text-transform:uppercase; letter-spacing:.08em; margin-bottom:2px;}
+
+  /* ---- SLOTS ---- */
+  .slots{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:6px;
+    margin-bottom:22px;
+  }
+  .slot{
+    aspect-ratio:1/1;
+    border-radius:10px;
+    border:2px dashed var(--graphite-3);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Bebas Neue';
+    font-size:20px;
+    color:#4A505A;
+    position:relative;
+    overflow:hidden;
+    transition:transform .25s ease;
+  }
+  .slot.filled{
+    border-style:solid;
+    color:#fff;
+    animation:pop .35s ease;
+  }
+  .slot .chk{position:absolute; bottom:3px; right:5px; font-size:11px;}
+  @keyframes pop{0%{transform:scale(.7);}60%{transform:scale(1.08);}100%{transform:scale(1);}}
+
+  /* ---- CARDS ---- */
+  .instructions{
+    background:var(--graphite-2);
+    border:1px solid var(--graphite-3);
+    border-left:4px solid var(--amber);
+    border-radius:10px;
+    padding:14px 16px;
+    font-size:14px;
+    color:#C8CDD5;
+    margin-bottom:18px;
+    line-height:1.5;
+  }
+  .instructions b{color:var(--amber);}
+  .cards{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+  .card{
+    background:var(--graphite-2);
+    border:1px solid var(--graphite-3);
+    border-radius:12px;
+    padding:16px 16px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    cursor:pointer;
+    transition:transform .15s ease, border-color .15s ease, background .15s ease;
+    user-select:none;
+  }
+  .card:active{transform:scale(.98);}
+  .card:hover{border-color:var(--amber); background:#22262d;}
+  .card .icon{
+    width:40px;height:40px;flex:none;
+    border-radius:9px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;
+    background:var(--graphite-3);
+  }
+  .card .txt b{
+    display:block;
+    font-size:15px;
+    color:#fff;
+    font-weight:700;
+  }
+  .card .txt span{
+    display:block;
+    font-size:12.5px;
+    color:#9AA1AC;
+    margin-top:2px;
+  }
+  .card.shake{animation:shake .4s ease;}
+  @keyframes shake{
+    10%,90%{transform:translateX(-2px);}
+    20%,80%{transform:translateX(4px);}
+    30%,50%,70%{transform:translateX(-8px);}
+    40%,60%{transform:translateX(8px);}
+  }
+
+  /* ---- ERROR OVERLAY ---- */
+  .overlay{
+    position:fixed; inset:0;
+    background:rgba(10,4,3,.92);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    padding:20px;
+    animation:fadein .18s ease;
+  }
+  .overlay.show{display:flex;}
+  @keyframes fadein{from{opacity:0;}to{opacity:1;}}
+  .flash{
+    position:fixed; inset:0;
+    background:var(--danger);
+    z-index:40;
+    opacity:0;
+    pointer-events:none;
+  }
+  .flash.go{animation:flashfx .5s ease;}
+  @keyframes flashfx{0%{opacity:.85;}100%{opacity:0;}}
+
+  .errbox{
+    max-width:440px;
+    width:100%;
+    background:linear-gradient(180deg,#1c1f24,#15171b);
+    border:2px solid var(--danger);
+    border-radius:16px;
+    padding:26px 22px 22px;
+    text-align:center;
+    box-shadow:0 0 0 6px rgba(217,41,28,.12), 0 20px 60px rgba(0,0,0,.5);
+  }
+  .errbox .tag{
+    display:inline-block;
+    background:var(--danger);
+    color:#fff;
+    font-family:'Bebas Neue';
+    font-size:14px;
+    letter-spacing:.12em;
+    padding:5px 14px;
+    border-radius:999px;
+    margin-bottom:14px;
+  }
+  .errbox h2{
+    font-family:'Bebas Neue';
+    font-size:30px;
+    color:#fff;
+    margin:0 0 12px;
+    letter-spacing:.02em;
+  }
+  .errbox .why{
+    background:rgba(217,41,28,.1);
+    border:1px solid rgba(217,41,28,.35);
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:13.5px;
+    color:#F3C9C5;
+    text-align:left;
+    line-height:1.5;
+    margin-bottom:14px;
+  }
+  .errbox .fact{
+    font-size:12.5px;
+    color:#8A909B;
+    line-height:1.5;
+    margin-bottom:18px;
+  }
+  .errbox .fact b{color:#C8CDD5;}
+  .btn{
+    display:block;
+    width:100%;
+    border:none;
+    border-radius:10px;
+    padding:14px;
+    font-family:'Bebas Neue';
+    font-size:18px;
+    letter-spacing:.05em;
+    cursor:pointer;
+    transition:transform .1s ease, filter .15s ease;
+  }
+  .btn:active{transform:scale(.98);}
+  .btn-danger{background:var(--danger); color:#fff;}
+  .btn-danger:hover{filter:brightness(1.1);}
+  .btn-amber{background:var(--amber); color:#1a1200;}
+  .btn-amber:hover{filter:brightness(1.08);}
+  .btn-ghost{background:transparent; color:#9AA1AC; border:1px solid var(--graphite-3); margin-top:10px;}
+
+  /* ---- WIN SCREEN ---- */
+  .win{display:none; text-align:center;}
+  .win.show{display:block; animation:fadein .3s ease;}
+  .win .medal{font-size:56px; margin-bottom:6px;}
+  .win h2{font-family:'Bebas Neue'; font-size:34px; color:#fff; margin:0 0 4px;}
+  .win .stats{
+    display:flex; gap:10px; justify-content:center; margin:18px 0;
+  }
+  .win .stat{
+    background:var(--graphite-2);
+    border:1px solid var(--graphite-3);
+    border-radius:12px;
+    padding:14px 10px;
+    flex:1;
+  }
+  .win .stat b{display:block; font-family:'Bebas Neue'; font-size:26px; color:var(--amber);}
+  .win .stat span{font-size:10.5px; color:#8A909B; text-transform:uppercase; letter-spacing:.06em;}
+  .steps-recap{text-align:left; margin:18px 0;}
+  .steps-recap .row{
+    display:flex; gap:10px; align-items:flex-start;
+    background:var(--graphite-2);
+    border:1px solid var(--graphite-3);
+    border-radius:10px;
+    padding:10px 12px;
+    margin-bottom:8px;
+  }
+  .steps-recap .num{
+    font-family:'Bebas Neue'; font-size:18px;
+    width:26px;height:26px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff; flex:none;
+  }
+  .steps-recap .row div b{display:block; font-size:13.5px; color:#fff;}
+  .steps-recap .row div span{font-size:12px; color:#9AA1AC;}
+
+  form.namef{display:flex; gap:8px; margin:16px 0;}
+  form.namef input{
+    flex:1;
+    background:var(--graphite-2);
+    border:1px solid var(--graphite-3);
+    border-radius:10px;
+    color:#fff;
+    padding:12px 14px;
+    font-size:14px;
+  }
+  form.namef input:focus{outline:none; border-color:var(--amber);}
+
+  .board{margin-top:22px;}
+  .board h3{font-family:'Bebas Neue'; font-size:20px; color:var(--amber); margin:0 0 10px; letter-spacing:.03em;}
+  .board table{width:100%; border-collapse:collapse; font-size:13px;}
+  .board td, .board th{padding:8px 6px; text-align:left; border-bottom:1px solid var(--graphite-3);}
+  .board th{color:#8A909B; font-weight:600; font-size:11px; text-transform:uppercase;}
+  .board tr:first-child td{color:var(--amber); font-weight:700;}
+
+  /* ---- START SCREEN ---- */
+  .startScreen{
+    text-align:center;
+    background:var(--graphite-2);
+    border:1px solid var(--graphite-3);
+    border-radius:16px;
+    padding:36px 22px;
+    margin-bottom:20px;
+  }
+  .startIcon{font-size:48px; margin-bottom:10px;}
+  .startScreen h2{font-family:'Bebas Neue'; font-size:28px; color:#fff; margin:0 0 10px;}
+  .startScreen p{font-size:14px; color:#B7BCC4; line-height:1.6; max-width:420px; margin:0 auto 22px;}
+  .startScreen p b{color:var(--amber);}
+  .startScreen .btn{max-width:280px; margin:0 auto;}
+  .startScreen input.nameInput{
+    display:block; width:100%; max-width:320px; margin:0 auto 14px;
+    background:var(--graphite-3); border:1px solid #3A4048;
+    border-radius:10px; color:#fff; padding:13px 14px; font-size:15px;
+    text-align:center;
+  }
+  .startScreen input.nameInput:focus{outline:none; border-color:var(--amber);}
+  .startScreen input.nameInput::placeholder{color:#8A909B;}
+  .savedMsg{
+    background:rgba(46,155,79,.12); border:1px solid var(--ok); border-radius:10px;
+    padding:14px; font-size:14px; color:#B7E3C2; margin:16px 0; text-align:center;
+  }
+  .savedMsg b{color:#fff;}
+
+  footer{
+    text-align:center;
+    padding:24px 16px 40px;
+    color:#5B616C;
+    font-size:11.5px;
+    letter-spacing:.04em;
+  }
+  .logo{font-family:'Bebas Neue'; color:#8A909B; letter-spacing:.06em;}
+  .logo b{color:var(--amber);}
+
+  /* ---- LEARN MORE FAB + PANEL ---- */
+  .fab{
+    position:fixed;
+    right:16px; bottom:16px;
+    z-index:60;
+    background:var(--amber);
+    color:#1a1200;
+    border:none;
+    border-radius:999px;
+    padding:13px 18px;
+    font-family:'Bebas Neue';
+    font-size:15px;
+    letter-spacing:.03em;
+    display:flex; align-items:center; gap:8px;
+    box-shadow:0 8px 24px rgba(0,0,0,.4);
+    cursor:pointer;
+  }
+  .fab:active{transform:scale(.97);}
+  .learnOverlay{
+    position:fixed; inset:0;
+    background:rgba(8,9,11,.7);
+    z-index:70;
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+  }
+  .learnOverlay.show{display:flex;}
+  .learnPanel{
+    width:100%;
+    max-width:640px;
+    max-height:88vh;
+    overflow-y:auto;
+    background:var(--graphite);
+    border-top:2px solid var(--amber);
+    border-radius:20px 20px 0 0;
+    padding:20px 18px 30px;
+    animation:slideup .25s ease;
+  }
+  @keyframes slideup{from{transform:translateY(30px); opacity:0;}to{transform:translateY(0); opacity:1;}}
+  .learnPanel h2{
+    font-family:'Bebas Neue'; font-size:26px; color:#fff; margin:0 0 4px;
+  }
+  .learnPanel .lsub{color:#9AA1AC; font-size:13px; margin-bottom:18px;}
+  .learnPanel h3{
+    font-family:'Bebas Neue'; font-size:17px; color:var(--amber);
+    letter-spacing:.03em; margin:22px 0 10px;
+  }
+  .vidlink{
+    display:flex; align-items:center; gap:10px;
+    background:var(--graphite-2);
+    border:1px solid var(--graphite-3);
+    border-radius:10px;
+    padding:11px 13px;
+    margin-bottom:8px;
+    text-decoration:none;
+    color:#fff;
+    font-size:13.5px;
+    transition:border-color .15s ease;
+  }
+  .vidlink:hover{border-color:var(--amber);}
+  .vidlink .play{
+    width:28px; height:28px; flex:none; border-radius:50%;
+    background:var(--danger); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:11px;
+  }
+  .acc{
+    background:var(--graphite-2);
+    border:1px solid var(--graphite-3);
+    border-radius:10px;
+    margin-bottom:8px;
+    overflow:hidden;
+  }
+  .acc summary{
+    padding:12px 14px;
+    cursor:pointer;
+    font-weight:700;
+    font-size:13.5px;
+    color:#fff;
+    list-style:none;
+    display:flex; align-items:center; gap:10px;
+  }
+  .acc summary::-webkit-details-marker{display:none;}
+  .acc summary .dot{width:10px; height:10px; border-radius:50%; flex:none;}
+  .acc .body{padding:0 14px 14px 34px; font-size:13px; color:#B7BCC4; line-height:1.55;}
+  .officiallink{
+    display:block;
+    color:var(--amber);
+    font-size:13px;
+    text-decoration:underline;
+    margin-top:6px;
+  }
+  .closeLearn{
+    display:block; margin:20px auto 0;
+    background:transparent; border:1px solid var(--graphite-3);
+    color:#9AA1AC; border-radius:10px; padding:11px 20px;
+    font-family:'Bebas Neue'; font-size:14px; cursor:pointer;
+  }
+
+  /* ---- energy table (unlocked at end) ---- */
+  .unlockBox{
+    margin-top:22px;
+    background:linear-gradient(180deg,#1a1f16,#15171b);
+    border:1px solid #3C9F5F;
+    border-radius:14px;
+    padding:16px;
+  }
+  .unlockBox .ulabel{
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--ok); color:#fff;
+    font-family:'Bebas Neue'; font-size:12px; letter-spacing:.1em;
+    padding:4px 10px; border-radius:999px; margin-bottom:10px;
+  }
+  .unlockBox h3{font-family:'Bebas Neue'; font-size:19px; color:#fff; margin:0 0 10px;}
+  .etable{width:100%; border-collapse:collapse; font-size:12.5px;}
+  .etable td{padding:9px 6px; border-bottom:1px solid var(--graphite-3); vertical-align:top;}
+  .etable td.tp{color:var(--amber); font-weight:700; white-space:nowrap; padding-right:10px;}
+  .etable td.mt{color:#C8CDD5; line-height:1.5;}
+</style>
+</head>
+<body>
+
+<div class="flash" id="flash"></div>
+<div class="hazard"></div>
+
+<header>
+  <div class="eyebrow">SafeSeg · Segurança do Trabalho</div>
+  <h1>DINÂMICA <span>ELÉTRICA</span><br>NR-10</h1>
+  <div class="sub">Coloque as 6 etapas na ordem oficial da NR-10 (item 10.5.1). Um erro de sequência pode custar caro — inclusive uma vida.</div>
+  <a href="index.html" style="display:inline-block; margin-top:14px; font-size:12px; color:#8A909B; text-decoration:underline;">← voltar para as dinâmicas</a>
+</header>
+
+<main>
+
+  <div class="hud" id="hud" style="display:none;">
+    <div class="item"><span class="label">Etapa</span><b id="hudStep">0/6</b></div>
+    <div class="item"><span class="label">Erros</span><b id="hudErrors">0</b></div>
+    <div class="item"><span class="label">Tempo</span><b id="hudTime">00:00</b></div>
+  </div>
+
+  <div class="startScreen" id="startScreen">
+    <div class="startIcon">🔒</div>
+    <h2>Pronto para começar?</h2>
+    <p>Você vai colocar as <b>6 etapas</b> do bloqueio de energia na ordem oficial da <b>NR-10 (item 10.5.1)</b>. Errou a ordem? O jogo reinicia do zero.</p>
+    <input type="text" class="nameInput" id="playerName" placeholder="Digite seu nome para começar" maxlength="24">
+    <button class="btn btn-amber" id="startBtn" disabled>▶ INICIAR DINÂMICA</button>
+  </div>
+
+  <div id="gameArea" style="display:none;">
+    <div class="slots" id="slots"></div>
+
+    <div class="instructions">
+      Toque nos cards abaixo <b>na ordem oficial</b> definida pela NR-10, item 10.5.1, para desenergização de instalações elétricas. Errou a ordem? O jogo reinicia — igual acontece no procedimento real: <b>não existe meio-termo em bloqueio de energia.</b>
+    </div>
+
+    <div class="cards" id="cards"></div>
+  </div>
+
+  <div class="win" id="winScreen">
+    <div class="medal">🔒✅</div>
+    <h2>BLOQUEIO CONCLUÍDO</h2>
+    <div class="sub" style="margin:0;">Você seguiu as 6 etapas na ordem oficial da NR-10. É assim que se salva vidas.</div>
+
+    <div class="stats">
+      <div class="stat"><b id="winTime">00:00</b><span>Tempo</span></div>
+      <div class="stat"><b id="winErrors">0</b><span>Erros</span></div>
+      <div class="stat"><b id="winTries">1</b><span>Tentativas</span></div>
+    </div>
+
+    <div class="steps-recap" id="recap"></div>
+
+    <div class="unlockBox">
+      <span class="ulabel">🔓 CONTEÚDO DESBLOQUEADO</span>
+      <h3>Fontes de energia e formas de bloqueio</h3>
+      <table class="etable" id="energyTable"></table>
+    </div>
+
+    <div class="unlockBox">
+      <span class="ulabel">🔓 CONTEÚDO DESBLOQUEADO</span>
+      <h3>Religar: a sequência oficial (NR-10, item 10.5.2)</h3>
+      <table class="etable" id="reenergizeTable"></table>
+    </div>
+
+    <div class="savedMsg" id="savedMsg">✔ Resultado salvo para <b id="savedName"></b></div>
+
+    <button class="btn btn-danger" id="restartBtn">JOGAR NOVAMENTE</button>
+
+    <div class="board">
+      <h3>🏆 Ranking do dia</h3>
+      <table id="boardTable"></table>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="logo">Safe<b>Seg</b> Segurança do Trabalho</div>
+  Bloqueio de energia é responsabilidade de todos.
+</footer>
+
+<button class="fab" id="fabLearn">📚 Quer aprender mais?</button>
+
+<div class="learnOverlay" id="learnOverlay">
+  <div class="learnPanel">
+    <h2>Quer aprender mais?</h2>
+    <div class="lsub">Vídeos e explicações completas sobre bloqueio de energia (LOTO).</div>
+
+    <h3>🎥 Vídeos recomendados</h3>
+    <div id="videoList"></div>
+
+    <h3>📖 Cada etapa, bem explicada</h3>
+    <div id="accList"></div>
+
+    <h3>📑 Norma oficial</h3>
+    <a class="officiallink" href="https://acesso.trabalho.gov.br/data/files/8A7C816A4DA189CA014E505FF4496DF0/NR-12%20(atualizada%202015).pdf" target="_blank" rel="noopener">NR-12 — Segurança no Trabalho em Máquinas e Equipamentos (texto oficial, Ministério do Trabalho) ↗</a>
+
+    <button class="closeLearn" id="closeLearn">FECHAR</button>
+  </div>
+</div>
+
+<!-- ERROR OVERLAY -->
+<div class="overlay" id="overlay">
+  <div class="errbox">
+    <span class="tag">⚠ ORDEM INCORRETA</span>
+    <h2 id="errTitle">Isso não pode ser feito agora</h2>
+    <div class="why" id="errWhy"></div>
+    <div class="fact" id="errFact"></div>
+    <button class="btn btn-danger" id="errRestart">ENTENDI — RECOMEÇAR</button>
+  </div>
+</div>
+
+<script>
+// ---------------------------------------------------------------
+// DADOS DAS 6 ETAPAS (ordem oficial NR-10, item 10.5.1)
+// ---------------------------------------------------------------
+const STEPS = [
+  {
+    title: "SECCIONAMENTO",
+    desc: "Desligar a fonte de energia que alimenta o equipamento (interromper o circuito).",
+    color: "var(--c1)",
+    icon: "🔴",
+    why: "Sem o seccionamento completo, o equipamento continua recebendo energia. Qualquer intervenção nesse ponto pode causar choque, esmagamento ou outro acidente imediato.",
+    norma: "NR-10, item 10.5.1, alínea a"
+  },
+  {
+    title: "IMPEDIMENTO DE REENERGIZAÇÃO",
+    desc: "Aplicar o dispositivo de bloqueio (cadeado) para impedir que a energia seja restabelecida.",
+    color: "var(--c2)",
+    icon: "🔒",
+    why: "Sem bloquear fisicamente o dispositivo de corte, qualquer pessoa pode religar o equipamento por engano enquanto alguém ainda está trabalhando nele.",
+    norma: "NR-10, item 10.5.1, alínea b"
+  },
+  {
+    title: "CONSTATAÇÃO DA AUSÊNCIA DE TENSÃO",
+    desc: "Confirmar, com equipamento de medição, que não há mais energia no ponto de trabalho.",
+    color: "var(--c3)",
+    icon: "🧪",
+    why: "Seccionar e bloquear não bastam: é preciso confirmar com um instrumento de medição. Muitos acidentes graves acontecem porque ninguém testou se a energia realmente estava zerada.",
+    norma: "NR-10, item 10.5.1, alínea c"
+  },
+  {
+    title: "ATERRAMENTO TEMPORÁRIO",
+    desc: "Instalar aterramento temporário com equipotencialização dos condutores do circuito.",
+    color: "var(--c4)",
+    icon: "🌐",
+    why: "Sem o aterramento temporário, uma energia induzida, residual ou de retorno pode reaparecer no circuito e eletrocutar quem está trabalhando nele.",
+    norma: "NR-10, item 10.5.1, alínea d"
+  },
+  {
+    title: "PROTEÇÃO DOS ELEMENTOS ENERGIZADOS",
+    desc: "Proteger, com barreiras isolantes, qualquer parte energizada que ainda exista na zona controlada.",
+    color: "var(--c5)",
+    icon: "🛡️",
+    why: "Pular essa etapa deixa partes vizinhas energizadas ao alcance do trabalhador, mesmo com o ponto principal já desenergizado.",
+    norma: "NR-10, item 10.5.1, alínea e"
+  },
+  {
+    title: "SINALIZAÇÃO",
+    desc: "Instalar a sinalização (placa ou etiqueta) de impedimento de reenergização.",
+    color: "var(--c6)",
+    icon: "🏷️",
+    why: "Sem a etiqueta, ninguém mais sabe que ali está em manutenção — e o risco de alguém tentar religar sem saber aumenta muito.",
+    norma: "NR-10, item 10.5.1, alínea f"
+  }
+];
+
+const REENERGIZE_TABLE = [
+  { p: "1", t: "Retirada das ferramentas, utensílios e equipamentos utilizados no serviço." },
+  { p: "2", t: "Retirada de todos os trabalhadores não envolvidos na reenergização da zona controlada." },
+  { p: "3", t: "Remoção do aterramento temporário, da equipotencialização e das proteções adicionais." },
+  { p: "4", t: "Remoção da sinalização de impedimento de reenergização." },
+  { p: "5", t: "Destravamento (se houver) e religação dos dispositivos de seccionamento." }
+];
+
+const ENERGY_TABLE = [
+  { tipo: "Elétrica", metodo: "Desligar o disjuntor/chave geral e aplicar cadeado + etiqueta no próprio dispositivo de corte." },
+  { tipo: "Pneumática", metodo: "Fechar o registro de ar comprimido, purgar (drenar) a pressão residual e bloquear a válvula com cadeado." },
+  { tipo: "Hidráulica", metodo: "Fechar a válvula de alimentação, aliviar a pressão residual do sistema e bloquear a válvula." },
+  { tipo: "Mecânica / Gravitacional", metodo: "Travar ou calçar partes suspensas e engatar travas mecânicas para impedir queda ou movimento." },
+  { tipo: "Térmica", metodo: "Aguardar o resfriamento (ou aquecimento controlado) da superfície e isolar a fonte de calor ou frio." },
+  { tipo: "Química", metodo: "Fechar e bloquear válvulas de alimentação, neutralizar resíduos e sinalizar a linha antes de intervir." }
+];
+
+const LEARN_VIDEOS = [
+  { t: "Treinamento LOTO na prática — NR-10 e NR-12", u: "https://www.youtube.com/watch?v=rDP8wc_21K4" },
+  { t: "Treinamento NR-10 — Bloqueio de Energias", u: "https://www.youtube.com/watch?v=fICrZocg7hU" },
+  { t: "LOTO e PCEP (Programa de Controle de Energias Perigosas) — vídeo-aula", u: "https://www.youtube.com/watch?v=aDSMB9PtNiQ" },
+  { t: "Como usar a caixa de bloqueio e travamento LOTO", u: "https://www.youtube.com/watch?v=nlBxVUgbb38" },
+  { t: "Curso completo de LOTO — Aula 01", u: "https://www.youtube.com/watch?v=m4xlaW2_QrI" }
+];
+
+const FACTS = [
+  "A NR-10 exige que a desenergização siga rigorosamente a sequência das alíneas a) a f) do item 10.5.1 — pular ou inverter uma etapa descumpre a norma e coloca vidas em risco.",
+  "A maioria dos acidentes graves em manutenção não acontece por falta de conhecimento — acontece por um passo pulado \"só dessa vez\".",
+  "Energia residual (ar comprimido, mola, gravidade, capacitor carregado) mata mesmo depois de o equipamento estar \"desligado\". Por isso a constatação da ausência de tensão nunca pode faltar.",
+  "Um cadeado de bloqueio custa poucos reais. O custo de pular essa etapa pode ser uma vida — a sua ou a de um colega."
+];
+
+// ---------------------------------------------------------------
+// ESTADO
+// ---------------------------------------------------------------
+let order = [];        // ordem embaralhada (índices dos cards visíveis)
+let current = 0;        // próxima etapa esperada (0-4)
+let playerName = '';
+let errors = 0;
+let tries = 1;
+let startTime = null;
+let timerInt = null;
+
+const slotsEl = document.getElementById('slots');
+const cardsEl = document.getElementById('cards');
+const overlay = document.getElementById('overlay');
+const flash = document.getElementById('flash');
+const gameArea = document.getElementById('gameArea');
+const winScreen = document.getElementById('winScreen');
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function fmtTime(ms){
+  const s = Math.floor(ms/1000);
+  const m = Math.floor(s/60);
+  const r = s%60;
+  return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0');
+}
+
+function tick(){
+  if(!startTime) return;
+  document.getElementById('hudTime').textContent = fmtTime(Date.now()-startTime);
+}
+
+function buildSlots(){
+  slotsEl.innerHTML = '';
+  STEPS.forEach((s,i)=>{
+    const d = document.createElement('div');
+    d.className = 'slot';
+    d.id = 'slot'+i;
+    d.style.color = '#4A505A';
+    d.textContent = i+1;
+    slotsEl.appendChild(d);
+  });
+}
+
+function buildCards(){
+  cardsEl.innerHTML = '';
+  order.forEach(idx=>{
+    const s = STEPS[idx];
+    const c = document.createElement('div');
+    c.className = 'card';
+    c.dataset.idx = idx;
+    c.innerHTML = `<div class="icon">${s.icon}</div><div class="txt"><b>${s.title}</b><span>${s.desc}</span></div>`;
+    c.addEventListener('click', ()=>onPick(idx,c));
+    cardsEl.appendChild(c);
+  });
+}
+
+function startGame(fullReset){
+  current = 0;
+  order = shuffle(STEPS.map((_,i)=>i));
+  buildSlots();
+  buildCards();
+  document.getElementById('hudStep').textContent = '0/6';
+  document.getElementById('hudErrors').textContent = errors;
+  if(fullReset){
+    errors = 0; tries = 1; startTime = Date.now();
+    document.getElementById('hudErrors').textContent = 0;
+  } else {
+    if(!startTime) startTime = Date.now();
+  }
+  gameArea.style.display = '';
+  winScreen.classList.remove('show');
+  if(timerInt) clearInterval(timerInt);
+  timerInt = setInterval(tick, 500);
+}
+
+function onPick(idx, cardEl){
+  if(idx === current){
+    // acerto
+    const slot = document.getElementById('slot'+current);
+    slot.classList.add('filled');
+    slot.style.background = STEPS[idx].color;
+    slot.style.borderColor = STEPS[idx].color;
+    slot.innerHTML = (current+1) + '<span class="chk">✔</span>';
+    cardEl.remove();
+    current++;
+    document.getElementById('hudStep').textContent = current+'/6';
+    if(current === 6){
+      clearInterval(timerInt);
+      showWin();
+    }
+  } else {
+    // erro
+    cardEl.classList.add('shake');
+    setTimeout(()=>cardEl.classList.remove('shake'),400);
+    triggerError(idx);
+  }
+}
+
+function triggerError(pickedIdx){
+  errors++;
+  tries++;
+  document.getElementById('hudErrors').textContent = errors;
+  flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go');
+
+  const missed = STEPS[current]; // etapa que deveria ter sido feita
+  document.getElementById('errTitle').textContent = `Faltou "${missed.title}" antes disso`;
+  document.getElementById('errWhy').innerHTML = missed.why + `<br><br><b style="color:#F3C9C5;">Base normativa:</b> ${missed.norma}.`;
+  document.getElementById('errFact').innerHTML = '<b>Você sabia?</b> ' + FACTS[Math.floor(Math.random()*FACTS.length)];
+  overlay.classList.add('show');
+}
+
+document.getElementById('errRestart').addEventListener('click', ()=>{
+  overlay.classList.remove('show');
+  startGame(false);
+});
+
+function showWin(){
+  gameArea.style.display = 'none';
+  winScreen.classList.add('show');
+  const elapsed = Date.now()-startTime;
+  document.getElementById('winTime').textContent = fmtTime(elapsed);
+  document.getElementById('winErrors').textContent = errors;
+  document.getElementById('winTries').textContent = tries;
+
+  const recap = document.getElementById('recap');
+  recap.innerHTML = '';
+  STEPS.forEach((s,i)=>{
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = `<div class="num" style="background:${s.color}">${i+1}</div><div><b>${s.title}</b><span>${s.desc}</span></div>`;
+    recap.appendChild(row);
+  });
+
+  salvarResultado();
+  renderEnergyTable();
+}
+
+function renderEnergyTable(){
+  const t = document.getElementById('energyTable');
+  t.innerHTML = ENERGY_TABLE.map(e=>
+    `<tr><td class="tp">${e.tipo}</td><td class="mt">${e.metodo}</td></tr>`
+  ).join('');
+
+  const rt = document.getElementById('reenergizeTable');
+  rt.innerHTML = REENERGIZE_TABLE.map(e=>
+    `<tr><td class="tp">${e.p}º</td><td class="mt">${e.t}</td></tr>`
+  ).join('');
+}
+
+// ---------------------------------------------------------------
+// RANKING LOCAL (localStorage)
+// ---------------------------------------------------------------
+// ---------------------------------------------------------------
+// INTEGRAÇÃO COM GOOGLE SHEETS (ver README.md para configurar)
+// ---------------------------------------------------------------
+const SHEET_WEBAPP_URL = "COLE_AQUI_A_URL_DO_APPS_SCRIPT";
+const JOGO_ID = "eletrica";
+
+function enviarParaSheets(nome, tempoMs, erros, tentativas){
+  if(!SHEET_WEBAPP_URL || !SHEET_WEBAPP_URL.startsWith('http')) return;
+  fetch(SHEET_WEBAPP_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ jogo: JOGO_ID, nome, tempo: fmtTime(tempoMs), erros, tentativas })
+  }).catch(()=>{});
+}
+
+const LB_KEY = 'safeseg_loto_nr10_leaderboard';
+
+function getBoard(){
+  try{ return JSON.parse(localStorage.getItem(LB_KEY)) || []; }
+  catch(e){ return []; }
+}
+function saveBoard(list){
+  localStorage.setItem(LB_KEY, JSON.stringify(list));
+}
+function renderBoard(){
+  const list = getBoard().sort((a,b)=> a.errors-b.errors || a.time-b.time).slice(0,10);
+  const table = document.getElementById('boardTable');
+  if(list.length===0){
+    table.innerHTML = '<tr><td style="color:#8A909B;">Ninguém completou a dinâmica ainda. Seja o primeiro!</td></tr>';
+    return;
+  }
+  let html = '<tr><th>#</th><th>Nome</th><th>Tempo</th><th>Erros</th></tr>';
+  list.forEach((p,i)=>{
+    html += `<tr><td>${i+1}º</td><td>${p.name}</td><td>${fmtTime(p.time)}</td><td>${p.errors}</td></tr>`;
+  });
+  table.innerHTML = html;
+}
+
+function salvarResultado(){
+  const list = getBoard();
+  const elapsedMs = Date.now()-startTime;
+  list.push({name: playerName, time: elapsedMs, errors, tries});
+  saveBoard(list);
+  enviarParaSheets(playerName, elapsedMs, errors, tries);
+  document.getElementById('savedName').textContent = playerName;
+  renderBoard();
+}
+
+document.getElementById('restartBtn').addEventListener('click', ()=>{
+  winScreen.classList.remove('show');
+  document.getElementById('hud').style.display = 'none';
+  document.getElementById('startScreen').style.display = '';
+  const nameInput = document.getElementById('playerName');
+  nameInput.value = '';
+  document.getElementById('startBtn').disabled = true;
+});
+
+// ---------------------------------------------------------------
+// PAINEL "QUER APRENDER MAIS?"
+// ---------------------------------------------------------------
+function renderLearnPanel(){
+  const vids = document.getElementById('videoList');
+  vids.innerHTML = LEARN_VIDEOS.map(v=>
+    `<a class="vidlink" href="${v.u}" target="_blank" rel="noopener"><span class="play">▶</span>${v.t}</a>`
+  ).join('');
+
+  const acc = document.getElementById('accList');
+  acc.innerHTML = STEPS.map((s,i)=>`
+    <details class="acc">
+      <summary><span class="dot" style="background:${s.color}"></span>${i+1}. ${s.title}</summary>
+      <div class="body">${s.desc} ${s.why}<br><br><b style="color:#C8CDD5;">${s.norma}</b></div>
+    </details>
+  `).join('');
+}
+renderLearnPanel();
+
+document.getElementById('fabLearn').addEventListener('click', ()=>{
+  document.getElementById('learnOverlay').classList.add('show');
+});
+document.getElementById('closeLearn').addEventListener('click', ()=>{
+  document.getElementById('learnOverlay').classList.remove('show');
+});
+document.getElementById('learnOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'learnOverlay') e.target.classList.remove('show');
+});
+
+// init
+renderBoard();
+document.getElementById('playerName').addEventListener('input', ()=>{
+  document.getElementById('startBtn').disabled = !document.getElementById('playerName').value.trim();
+});
+document.getElementById('playerName').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter' && !document.getElementById('startBtn').disabled) document.getElementById('startBtn').click();
+});
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  playerName = document.getElementById('playerName').value.trim();
+  if(!playerName) return;
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('hud').style.display = '';
+  gameArea.style.display = '';
+  startGame(true);
+});
+</script>
+</body>
+</html>

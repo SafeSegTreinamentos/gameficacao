@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Dinâmica — Quiz da PET (NR-33) | SafeSeg</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --amber:#F59E0B;
+    --graphite:#14171B;
+    --graphite-2:#1E2228;
+    --graphite-3:#2A2F37;
+    --danger:#D9291C;
+    --ok:#2E9B4F;
+    --paper:#F4F1E9;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 10% -10%, #23272f 0%, transparent 60%),
+      var(--graphite);
+    color:var(--paper);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .hazard{
+    height:10px;
+    background:repeating-linear-gradient(135deg,var(--amber) 0 22px,var(--graphite) 22px 44px);
+  }
+  header{
+    padding:22px 20px 18px;
+    text-align:center;
+    border-bottom:1px solid var(--graphite-3);
+  }
+  .eyebrow{
+    font-size:11px; letter-spacing:.28em; text-transform:uppercase;
+    color:var(--amber); font-weight:700; margin-bottom:6px;
+  }
+  h1{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(36px,9vw,58px);
+    letter-spacing:.02em; margin:0; line-height:.95; color:#fff;
+  }
+  h1 span{color:var(--amber);}
+  .sub{color:#9AA1AC; font-size:14px; margin-top:8px; max-width:520px; margin-left:auto; margin-right:auto;}
+  main{max-width:640px; margin:0 auto; padding:22px 16px 60px;}
+
+  .hud{
+    display:flex; justify-content:space-between; align-items:center;
+    background:var(--graphite-2); border:1px solid var(--graphite-3);
+    border-radius:14px; padding:12px 16px; margin-bottom:20px; font-size:13px;
+  }
+  .hud b{color:var(--amber); font-family:'Bebas Neue'; font-size:20px; letter-spacing:.03em;}
+  .hud .item{text-align:center;}
+  .hud .label{display:block; color:#8A909B; font-size:10px; text-transform:uppercase; letter-spacing:.08em; margin-bottom:2px;}
+
+  .progressBar{
+    height:6px; border-radius:999px; background:var(--graphite-3);
+    overflow:hidden; margin-bottom:20px;
+  }
+  .progressFill{
+    height:100%; background:var(--amber); border-radius:999px;
+    transition:width .3s ease; width:0%;
+  }
+
+  .startScreen{
+    text-align:center; background:var(--graphite-2); border:1px solid var(--graphite-3);
+    border-radius:16px; padding:36px 22px; margin-bottom:20px;
+  }
+  .startIcon{font-size:48px; margin-bottom:10px;}
+  .startScreen h2{font-family:'Bebas Neue'; font-size:28px; color:#fff; margin:0 0 10px;}
+  .startScreen p{font-size:14px; color:#B7BCC4; line-height:1.6; max-width:420px; margin:0 auto 22px;}
+  .startScreen p b{color:var(--amber);}
+  .startScreen .btn{max-width:280px; margin:0 auto;}
+  .startScreen input.nameInput{
+    display:block; width:100%; max-width:320px; margin:0 auto 14px;
+    background:var(--graphite-3); border:1px solid #3A4048;
+    border-radius:10px; color:#fff; padding:13px 14px; font-size:15px;
+    text-align:center;
+  }
+  .startScreen input.nameInput:focus{outline:none; border-color:var(--amber);}
+  .startScreen input.nameInput::placeholder{color:#8A909B;}
+  .savedMsg{
+    background:rgba(46,155,79,.12); border:1px solid var(--ok); border-radius:10px;
+    padding:14px; font-size:14px; color:#B7E3C2; margin:16px 0; text-align:center;
+  }
+  .savedMsg b{color:#fff;}
+
+  .qcard{
+    background:var(--graphite-2); border:1px solid var(--graphite-3);
+    border-radius:16px; padding:20px 18px; margin-bottom:16px;
+  }
+  .qcard .qtag{
+    display:inline-block; font-family:'Bebas Neue'; font-size:11px; letter-spacing:.1em;
+    background:var(--graphite-3); color:var(--amber); padding:4px 10px; border-radius:999px; margin-bottom:12px;
+  }
+  .qcard h2{font-size:17px; line-height:1.4; color:#fff; margin:0; font-weight:700;}
+
+  .options{display:flex; flex-direction:column; gap:10px;}
+  .opt{
+    background:var(--graphite-2); border:1px solid var(--graphite-3);
+    border-radius:12px; padding:14px 16px; font-size:14px; color:#E5E7EB;
+    cursor:pointer; text-align:left; transition:border-color .15s ease, background .15s ease, transform .1s ease;
+    display:flex; gap:10px; align-items:flex-start;
+  }
+  .opt:active{transform:scale(.99);}
+  .opt:not(.locked):hover{border-color:var(--amber);}
+  .opt .letter{
+    flex:none; width:26px; height:26px; border-radius:50%;
+    background:var(--graphite-3); color:#9AA1AC; font-family:'Bebas Neue'; font-size:14px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .opt.correct{border-color:var(--ok); background:rgba(46,155,79,.12);}
+  .opt.correct .letter{background:var(--ok); color:#fff;}
+  .opt.wrong{border-color:var(--danger); background:rgba(217,41,28,.12);}
+  .opt.wrong .letter{background:var(--danger); color:#fff;}
+  .opt.locked{cursor:default;}
+
+  .explainBox{
+    display:none;
+    margin-top:14px;
+    background:var(--graphite-2);
+    border-left:4px solid var(--amber);
+    border-radius:10px;
+    padding:14px 16px;
+    font-size:13.5px;
+    color:#C8CDD5;
+    line-height:1.55;
+  }
+  .explainBox.show{display:block; animation:fadein .2s ease;}
+  .explainBox b{color:var(--amber);}
+  @keyframes fadein{from{opacity:0;}to{opacity:1;}}
+
+  .flash{position:fixed; inset:0; z-index:5; opacity:0; pointer-events:none;}
+  .flash.ok{background:var(--ok);}
+  .flash.bad{background:var(--danger);}
+  .flash.go{animation:flashfx .4s ease;}
+  @keyframes flashfx{0%{opacity:.55;}100%{opacity:0;}}
+
+  .btn{
+    display:block; width:100%; border:none; border-radius:10px; padding:14px;
+    font-family:'Bebas Neue'; font-size:18px; letter-spacing:.05em;
+    cursor:pointer; transition:transform .1s ease, filter .15s ease;
+  }
+  .btn:active{transform:scale(.98);}
+  .btn-amber{background:var(--amber); color:#1a1200;}
+  .btn-amber:hover{filter:brightness(1.08);}
+  .btn-danger{background:var(--danger); color:#fff;}
+  .btn-ghost{background:transparent; color:#9AA1AC; border:1px solid var(--graphite-3); margin-top:10px;}
+  .btn[disabled]{opacity:.4; cursor:not-allowed;}
+  .nextWrap{margin-top:16px; display:none;}
+  .nextWrap.show{display:block;}
+
+  .win{display:none; text-align:center;}
+  .win.show{display:block; animation:fadein .3s ease;}
+  .win .medal{font-size:56px; margin-bottom:6px;}
+  .win h2{font-family:'Bebas Neue'; font-size:34px; color:#fff; margin:0 0 4px;}
+  .win .stats{display:flex; gap:10px; justify-content:center; margin:18px 0;}
+  .win .stat{background:var(--graphite-2); border:1px solid var(--graphite-3); border-radius:12px; padding:14px 10px; flex:1;}
+  .win .stat b{display:block; font-family:'Bebas Neue'; font-size:26px; color:var(--amber);}
+  .win .stat span{font-size:10.5px; color:#8A909B; text-transform:uppercase; letter-spacing:.06em;}
+
+  .reviewList{text-align:left; margin:18px 0;}
+  .reviewList h3{font-family:'Bebas Neue'; font-size:19px; color:#fff; margin:0 0 10px;}
+  .rev{
+    background:var(--graphite-2); border:1px solid var(--graphite-3); border-left:4px solid var(--danger);
+    border-radius:10px; padding:12px 14px; margin-bottom:8px; text-align:left;
+  }
+  .rev .q{font-size:13.5px; color:#fff; font-weight:700; margin-bottom:6px;}
+  .rev .a{font-size:12.5px; color:#C8CDD5; line-height:1.5;}
+  .rev .a b{color:var(--ok);}
+  .allCorrect{
+    background:rgba(46,155,79,.12); border:1px solid var(--ok); border-radius:10px;
+    padding:14px; font-size:13.5px; color:#B7E3C2; margin:18px 0; text-align:center;
+  }
+
+  form.namef{display:flex; gap:8px; margin:16px 0;}
+  form.namef input{
+    flex:1; background:var(--graphite-2); border:1px solid var(--graphite-3);
+    border-radius:10px; color:#fff; padding:12px 14px; font-size:14px;
+  }
+  form.namef input:focus{outline:none; border-color:var(--amber);}
+
+  .board{margin-top:22px;}
+  .board h3{font-family:'Bebas Neue'; font-size:20px; color:var(--amber); margin:0 0 10px; letter-spacing:.03em;}
+  .board table{width:100%; border-collapse:collapse; font-size:13px;}
+  .board td, .board th{padding:8px 6px; text-align:left; border-bottom:1px solid var(--graphite-3);}
+  .board th{color:#8A909B; font-weight:600; font-size:11px; text-transform:uppercase;}
+  .board tr:first-child td{color:var(--amber); font-weight:700;}
+
+  footer{text-align:center; padding:24px 16px 40px; color:#5B616C; font-size:11.5px; letter-spacing:.04em;}
+  .logo{font-family:'Bebas Neue'; color:#8A909B; letter-spacing:.06em;}
+  .logo b{color:var(--amber);}
+
+  .fab{
+    position:fixed; right:16px; bottom:16px; z-index:60;
+    background:var(--amber); color:#1a1200; border:none; border-radius:999px;
+    padding:13px 18px; font-family:'Bebas Neue'; font-size:15px; letter-spacing:.03em;
+    display:flex; align-items:center; gap:8px; box-shadow:0 8px 24px rgba(0,0,0,.4); cursor:pointer;
+  }
+  .fab:active{transform:scale(.97);}
+  .learnOverlay{position:fixed; inset:0; background:rgba(8,9,11,.7); z-index:70; display:none; align-items:flex-end; justify-content:center;}
+  .learnOverlay.show{display:flex;}
+  .learnPanel{
+    width:100%; max-width:640px; max-height:88vh; overflow-y:auto;
+    background:var(--graphite); border-top:2px solid var(--amber); border-radius:20px 20px 0 0;
+    padding:20px 18px 30px; animation:slideup .25s ease;
+  }
+  @keyframes slideup{from{transform:translateY(30px); opacity:0;}to{transform:translateY(0); opacity:1;}}
+  .learnPanel h2{font-family:'Bebas Neue'; font-size:26px; color:#fff; margin:0 0 4px;}
+  .learnPanel .lsub{color:#9AA1AC; font-size:13px; margin-bottom:18px;}
+  .learnPanel h3{font-family:'Bebas Neue'; font-size:17px; color:var(--amber); letter-spacing:.03em; margin:22px 0 10px;}
+  .vidlink{
+    display:flex; align-items:center; gap:10px; background:var(--graphite-2); border:1px solid var(--graphite-3);
+    border-radius:10px; padding:11px 13px; margin-bottom:8px; text-decoration:none; color:#fff; font-size:13.5px;
+    transition:border-color .15s ease;
+  }
+  .vidlink:hover{border-color:var(--amber);}
+  .vidlink .play{width:28px; height:28px; flex:none; border-radius:50%; background:var(--danger); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px;}
+  .officiallink{display:block; color:var(--amber); font-size:13px; text-decoration:underline; margin-top:6px;}
+  .closeLearn{display:block; margin:20px auto 0; background:transparent; border:1px solid var(--graphite-3); color:#9AA1AC; border-radius:10px; padding:11px 20px; font-family:'Bebas Neue'; font-size:14px; cursor:pointer;}
+</style>
+</head>
+<body>
+
+<div class="flash" id="flash"></div>
+<div class="hazard"></div>
+
+<header>
+  <div class="eyebrow">SafeSeg · Segurança do Trabalho</div>
+  <h1>QUIZ DA <span>PET</span><br>NR-33</h1>
+  <div class="sub">Para que serve cada campo da Permissão de Entrada e Trabalho? Responda e descubra.</div>
+  <a href="index.html" style="display:inline-block; margin-top:14px; font-size:12px; color:#8A909B; text-decoration:underline;">← voltar para as dinâmicas</a>
+</header>
+
+<main>
+
+  <div class="hud" id="hud" style="display:none;">
+    <div class="item"><span class="label">Pergunta</span><b id="hudStep">0/12</b></div>
+    <div class="item"><span class="label">Acertos</span><b id="hudScore">0</b></div>
+    <div class="item"><span class="label">Tempo</span><b id="hudTime">00:00</b></div>
+  </div>
+  <div class="progressBar" id="progressBar" style="display:none;"><div class="progressFill" id="progressFill"></div></div>
+
+  <div class="startScreen" id="startScreen">
+    <div class="startIcon">📋</div>
+    <h2>Você sabe pra que serve cada campo da PET?</h2>
+    <p>12 perguntas sobre os campos de uma <b>Permissão de Entrada e Trabalho</b> real, usada na indústria para liberar serviços em espaço confinado e outras atividades de risco.</p>
+    <input type="text" class="nameInput" id="playerName" placeholder="Digite seu nome para começar" maxlength="24">
+    <button class="btn btn-amber" id="startBtn" disabled>▶ COMEÇAR QUIZ</button>
+  </div>
+
+  <div id="gameArea" style="display:none;">
+    <div class="qcard">
+      <span class="qtag" id="qTag">PERGUNTA 1 DE 12</span>
+      <h2 id="qText"></h2>
+    </div>
+    <div class="options" id="options"></div>
+    <div class="explainBox" id="explainBox"></div>
+    <div class="nextWrap" id="nextWrap">
+      <button class="btn btn-amber" id="nextBtn">PRÓXIMA PERGUNTA →</button>
+    </div>
+  </div>
+
+  <div class="win" id="winScreen">
+    <div class="medal" id="medal">🏅</div>
+    <h2 id="winTitle">QUIZ CONCLUÍDO</h2>
+    <div class="sub" style="margin:0;" id="winSub">Você terminou o quiz da PET.</div>
+
+    <div class="stats">
+      <div class="stat"><b id="winScore">0/12</b><span>Acertos</span></div>
+      <div class="stat"><b id="winTime">00:00</b><span>Tempo</span></div>
+    </div>
+
+    <div id="reviewWrap"></div>
+
+    <div class="savedMsg" id="savedMsg">✔ Resultado salvo para <b id="savedName"></b></div>
+
+    <button class="btn btn-danger" id="restartBtn">JOGAR NOVAMENTE</button>
+
+    <div class="board">
+      <h3>🏆 Ranking do dia</h3>
+      <table id="boardTable"></table>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="logo">Safe<b>Seg</b> Segurança do Trabalho</div>
+  Bloqueio de energia é responsabilidade de todos.
+</footer>
+
+<button class="fab" id="fabLearn">📚 Quer aprender mais?</button>
+
+<div class="learnOverlay" id="learnOverlay">
+  <div class="learnPanel">
+    <h2>Quer aprender mais?</h2>
+    <div class="lsub">Vídeos e materiais sobre a PET e o trabalho em espaço confinado (NR-33).</div>
+
+    <h3>🎥 Vídeos recomendados</h3>
+    <div id="videoList"></div>
+
+    <h3>📑 Norma oficial</h3>
+    <a class="officiallink" href="https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/comissao-tripartite-partitaria-permanente/arquivos/normas-regulamentadoras/nr-33_guia_tecnico_da_nr_33.pdf" target="_blank" rel="noopener">NR-33 — Guia Técnico oficial (Ministério do Trabalho) ↗</a>
+
+    <button class="closeLearn" id="closeLearn">FECHAR</button>
+  </div>
+</div>
+
+<script>
+// ---------------------------------------------------------------
+// PERGUNTAS DO QUIZ — campos de uma PET (Permissão de Entrada e Trabalho)
+// baseado na estrutura padrão usada na indústria para liberação de
+// serviços (espaço confinado, trabalho a quente, elétrico etc.)
+// ---------------------------------------------------------------
+const QUIZ = [
+  {
+    q: "Para que serve o campo de Requisição, no início da PET?",
+    opts: [
+      "Identificar quem pede o serviço, quem aprova, o início e a validade da permissão",
+      "Listar os equipamentos de proteção individual necessários",
+      "Registrar o resultado das medições de gases",
+      "Anotar o motivo de um eventual cancelamento"
+    ],
+    correct: 0,
+    explain: "A Requisição é a \"capa\" da PET: define quem solicita, quem aprova, quando o serviço começa e até quando a permissão vale."
+  },
+  {
+    q: "O campo de Caracterização do Trabalho serve para quê?",
+    opts: [
+      "Marcar a assinatura final do serviço",
+      "Marcar o tipo de trabalho: a quente, a frio, escavação, sistemas elétricos, espaço confinado etc.",
+      "Listar as ferramentas elétricas disponíveis no almoxarifado",
+      "Registrar o nome da empresa contratada, apenas"
+    ],
+    correct: 1,
+    explain: "Aqui se define a natureza do serviço — isso muda todas as exigências de segurança que aparecem no resto da PET."
+  },
+  {
+    q: "O campo Características do Ambiente de Trabalho existe para quê?",
+    opts: [
+      "Definir o valor padrão de oxigênio aceitável no espaço confinado",
+      "Listar os equipamentos que serão utilizados no serviço",
+      "Assinalar condições do local: piso escorregadio, atmosfera modificada, equipamento energizado, trânsito de veículos etc.",
+      "Registrar a autorização final do requisitante"
+    ],
+    correct: 2,
+    explain: "São as condições do ambiente que podem virar risco — chuva, piso molhado, pessoas ou veículos circulando por perto."
+  },
+  {
+    q: "Para que serve o campo Equipamentos a serem Utilizados?",
+    opts: [
+      "Registrar os perigos do ambiente de trabalho",
+      "Listar as ferramentas e equipamentos que serão usados no serviço, como solda, detector de gás, andaime ou escada",
+      "Anotar a validade da PET",
+      "Marcar os EPIs necessários para a atividade"
+    ],
+    correct: 1,
+    explain: "Saber com antecedência quais equipamentos serão usados ajuda a prever riscos específicos de cada um — por exemplo, solda traz risco de incêndio."
+  },
+  {
+    q: "O campo Perigos, na PET, serve para quê?",
+    opts: [
+      "Listar as empresas contratadas para o serviço",
+      "Registrar a data de validade da permissão",
+      "Marcar os EPIs disponíveis no almoxarifado",
+      "Identificar riscos concretos da atividade: choque mecânico, energia elétrica, gases tóxicos, incêndio, deficiência de oxigênio etc."
+    ],
+    correct: 3,
+    explain: "É aqui que se nomeia, um por um, os perigos concretos daquele serviço específico — a base para definir os controles necessários."
+  },
+  {
+    q: "Para que serve o campo de Equipamentos de Proteção Individual (EPI)?",
+    opts: [
+      "Marcar quais EPIs são necessários para aquele serviço específico, como avental de PVC, protetor auricular ou respirador com filtro",
+      "Listar as ferramentas elétricas usadas no serviço",
+      "Registrar o número da Ordem de Serviço",
+      "Anotar o resultado das medições de gases"
+    ],
+    correct: 0,
+    explain: "Cada tipo de trabalho exige EPIs diferentes — esse campo garante que ninguém entra na atividade sem a proteção certa."
+  },
+  {
+    q: "Quem é responsável pelo Check List de Liberação de Serviços, e para que ele serve?",
+    opts: [
+      "É preenchido pelo executante, só para registrar o horário de almoço da equipe",
+      "É de responsabilidade do requisitante, e serve para listar o nome da empresa contratada",
+      "É de responsabilidade do aprovador, e confirma item por item que as condições de segurança foram atendidas antes de liberar o trabalho",
+      "É de responsabilidade do vigia, e serve apenas para autorizar o horário de entrada"
+    ],
+    correct: 2,
+    explain: "Assinalar \"Não\" em qualquer item do check list é condição impeditiva — o trabalho não pode ser liberado até resolver aquele ponto."
+  },
+  {
+    q: "No campo de Avaliações para Espaço Confinado, o que costuma ser medido?",
+    opts: [
+      "O peso dos equipamentos usados no serviço",
+      "Oxigênio, explosividade (gases inflamáveis) e gases tóxicos, comparados a um padrão de segurança",
+      "O número de trabalhadores presentes no local",
+      "Apenas a temperatura ambiente"
+    ],
+    correct: 1,
+    explain: "Sem essas medições dentro do padrão de segurança (por exemplo, oxigênio entre 19,5% e 23%), a entrada no espaço confinado não pode ser autorizada."
+  },
+  {
+    q: "O que é o Termo de Responsabilidade, presente na PET?",
+    opts: [
+      "Um resumo dos perigos do trabalho",
+      "A lista de ferramentas elétricas usadas no serviço",
+      "O horário de início do serviço",
+      "Uma declaração assinada pelo executante de que vai cumprir as medidas de controle e usar os EPIs necessários"
+    ],
+    correct: 3,
+    explain: "É o compromisso formal de quem vai executar o trabalho — sem essa assinatura, ninguém pode alegar que \"não sabia\" das exigências de segurança."
+  },
+  {
+    q: "Para que serve o campo de Autorização da PET?",
+    opts: [
+      "Registrar o motivo de um cancelamento",
+      "Anotar a validade do treinamento dos executantes",
+      "Confirmar que os riscos foram avaliados e autorizar a execução do trabalho conforme as medidas descritas na PET",
+      "Marcar os perigos do ambiente de trabalho"
+    ],
+    correct: 2,
+    explain: "É o \"sinal verde\" formal — depois da autorização, o trabalho pode começar seguindo exatamente o que está descrito na PET."
+  },
+  {
+    q: "O campo de Encerramento, no fim da PET, serve para quê?",
+    opts: [
+      "Listar os equipamentos que serão usados no próximo serviço",
+      "Registrar a assinatura de encerramento, o horário de término e se a área ficou limpa e organizada",
+      "Anotar o nome do requisitante do serviço",
+      "Marcar os perigos do ambiente de trabalho"
+    ],
+    correct: 1,
+    explain: "Encerrar formalmente a PET evita que ela continue \"valendo\" depois que o serviço já acabou, e confirma que o local ficou seguro."
+  },
+  {
+    q: "Quando o campo Cancelada deve ser preenchido?",
+    opts: [
+      "Sempre que o trabalho é concluído com sucesso",
+      "No início de todo serviço, como rotina",
+      "Apenas quando o requisitante muda de setor",
+      "Quando a PET é cancelada antes ou durante o serviço, com o motivo registrado"
+    ],
+    correct: 3,
+    explain: "Cancelar com o motivo registrado documenta por que aquele trabalho não seguiu como planejado — importante para rastrear o histórico da PET."
+  }
+];
+
+const LEARN_VIDEOS = [
+  { t: "Vídeo-aula — Permissão de Entrada e Trabalho (PET) NR-33", u: "https://www.youtube.com/watch?v=vSC8kPVX21E" },
+  { t: "Treinamento NR-33 — procedimentos básicos em espaço confinado", u: "https://www.youtube.com/watch?v=VhtkNWtA85k" },
+  { t: "NR-33 atualizada — treinamento completo", u: "https://www.youtube.com/watch?v=qHfmCEsm5ls" }
+];
+
+// ---------------------------------------------------------------
+// INTEGRAÇÃO COM GOOGLE SHEETS (ver README.md para configurar)
+// ---------------------------------------------------------------
+const SHEET_WEBAPP_URL = "COLE_AQUI_A_URL_DO_APPS_SCRIPT";
+const JOGO_ID = "pet";
+
+function enviarParaSheets(nome, tempoMs, erros, tentativas){
+  if(!SHEET_WEBAPP_URL || !SHEET_WEBAPP_URL.startsWith('http')) return;
+  fetch(SHEET_WEBAPP_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ jogo: JOGO_ID, nome, tempo: fmtTime(tempoMs), erros, tentativas })
+  }).catch(()=>{});
+}
+
+// ---------------------------------------------------------------
+// ESTADO
+// ---------------------------------------------------------------
+let current = 0;
+let score = 0;
+let playerName = '';
+let wrong = [];
+let startTime = null;
+let timerInt = null;
+let answered = false;
+
+const gameArea = document.getElementById('gameArea');
+const winScreen = document.getElementById('winScreen');
+const flash = document.getElementById('flash');
+
+function fmtTime(ms){
+  const s = Math.floor(ms/1000);
+  const m = Math.floor(s/60);
+  const r = s%60;
+  return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0');
+}
+function tick(){
+  if(!startTime) return;
+  document.getElementById('hudTime').textContent = fmtTime(Date.now()-startTime);
+}
+
+function shuffleOptions(item){
+  const idx = item.opts.map((_,i)=>i);
+  for(let i=idx.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [idx[i],idx[j]]=[idx[j],idx[i]];
+  }
+  return idx;
+}
+
+function renderQuestion(){
+  answered = false;
+  const item = QUIZ[current];
+  document.getElementById('qTag').textContent = `PERGUNTA ${current+1} DE ${QUIZ.length}`;
+  document.getElementById('qText').textContent = item.q;
+  document.getElementById('hudStep').textContent = `${current+1}/${QUIZ.length}`;
+  document.getElementById('progressFill').style.width = ((current)/QUIZ.length*100)+'%';
+
+  const order = shuffleOptions(item);
+  const letters = ['A','B','C','D'];
+  const optsEl = document.getElementById('options');
+  optsEl.innerHTML = '';
+  order.forEach((origIdx, pos)=>{
+    const btn = document.createElement('div');
+    btn.className = 'opt';
+    btn.innerHTML = `<span class="letter">${letters[pos]}</span><span>${item.opts[origIdx]}</span>`;
+    btn.addEventListener('click', ()=>onAnswer(origIdx, btn));
+    optsEl.appendChild(btn);
+  });
+
+  document.getElementById('explainBox').classList.remove('show');
+  document.getElementById('nextWrap').classList.remove('show');
+}
+
+function onAnswer(idx, el){
+  if(answered) return;
+  answered = true;
+  const item = QUIZ[current];
+  const allOpts = document.querySelectorAll('.opt');
+  allOpts.forEach(o=>o.classList.add('locked'));
+
+  if(idx === item.correct){
+    el.classList.add('correct');
+    score++;
+    flash.className = 'flash ok go';
+  } else {
+    el.classList.add('wrong');
+    allOpts.forEach(o=>{
+      if(o.textContent.includes(item.opts[item.correct])) o.classList.add('correct');
+    });
+    wrong.push({ q: item.q, correct: item.opts[item.correct] });
+    flash.className = 'flash bad go';
+  }
+  setTimeout(()=>{ flash.className = 'flash'; }, 450);
+
+  document.getElementById('hudScore').textContent = score;
+  const eb = document.getElementById('explainBox');
+  eb.innerHTML = `<b>${idx===item.correct ? 'Isso mesmo.' : 'Não é bem assim.'}</b> ${item.explain}`;
+  eb.classList.add('show');
+  document.getElementById('nextWrap').classList.add('show');
+}
+
+document.getElementById('nextBtn').addEventListener('click', ()=>{
+  current++;
+  if(current >= QUIZ.length){
+    finishQuiz();
+  } else {
+    renderQuestion();
+  }
+});
+
+function finishQuiz(){
+  clearInterval(timerInt);
+  document.getElementById('progressFill').style.width = '100%';
+  gameArea.style.display = 'none';
+  winScreen.classList.add('show');
+
+  const elapsed = Date.now()-startTime;
+  document.getElementById('winTime').textContent = fmtTime(elapsed);
+  document.getElementById('winScore').textContent = `${score}/${QUIZ.length}`;
+
+  let medal, title, sub;
+  if(score === QUIZ.length){ medal='🏆'; title='GABARITO PERFEITO'; sub='Você acertou todos os campos da PET. Mandou muito bem.'; }
+  else if(score >= QUIZ.length*0.7){ medal='🥈'; title='MUITO BOM'; sub='Você já domina bem os campos da PET — só alguns detalhes pra revisar.'; }
+  else { medal='📋'; title='QUIZ CONCLUÍDO'; sub='Vale revisar os campos abaixo antes da próxima PET que você preencher.'; }
+  document.getElementById('medal').textContent = medal;
+  document.getElementById('winTitle').textContent = title;
+  document.getElementById('winSub').textContent = sub;
+
+  const reviewWrap = document.getElementById('reviewWrap');
+  if(wrong.length === 0){
+    reviewWrap.innerHTML = '<div class="allCorrect">✅ Você acertou as 12 perguntas — nenhum campo pra revisar.</div>';
+  } else {
+    let html = '<div class="reviewList"><h3>Vale revisar</h3>';
+    wrong.forEach(w=>{
+      html += `<div class="rev"><div class="q">${w.q}</div><div class="a"><b>Resposta certa:</b> ${w.correct}</div></div>`;
+    });
+    html += '</div>';
+    reviewWrap.innerHTML = html;
+  }
+
+  salvarResultado();
+}
+
+function startQuiz(){
+  current = 0; score = 0; wrong = [];
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('hud').style.display = '';
+  document.getElementById('progressBar').style.display = '';
+  gameArea.style.display = '';
+  winScreen.classList.remove('show');
+  startTime = Date.now();
+  if(timerInt) clearInterval(timerInt);
+  timerInt = setInterval(tick, 500);
+  renderQuestion();
+}
+
+document.getElementById('playerName').addEventListener('input', ()=>{
+  document.getElementById('startBtn').disabled = !document.getElementById('playerName').value.trim();
+});
+document.getElementById('playerName').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter' && !document.getElementById('startBtn').disabled) document.getElementById('startBtn').click();
+});
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  playerName = document.getElementById('playerName').value.trim();
+  if(!playerName) return;
+  startQuiz();
+});
+document.getElementById('restartBtn').addEventListener('click', ()=>{
+  winScreen.classList.remove('show');
+  document.getElementById('hud').style.display = 'none';
+  document.getElementById('progressBar').style.display = 'none';
+  document.getElementById('startScreen').style.display = '';
+  const nameInput = document.getElementById('playerName');
+  nameInput.value = '';
+  document.getElementById('startBtn').disabled = true;
+});
+
+// ---------------------------------------------------------------
+// RANKING LOCAL (localStorage)
+// ---------------------------------------------------------------
+const LB_KEY = 'safeseg_quiz_pet_nr33_leaderboard';
+
+function getBoard(){
+  try{ return JSON.parse(localStorage.getItem(LB_KEY)) || []; }
+  catch(e){ return []; }
+}
+function saveBoard(list){ localStorage.setItem(LB_KEY, JSON.stringify(list)); }
+
+function renderBoard(){
+  const list = getBoard().sort((a,b)=> b.score-a.score || a.time-b.time).slice(0,10);
+  const table = document.getElementById('boardTable');
+  if(list.length===0){
+    table.innerHTML = '<tr><td style="color:#8A909B;">Ninguém completou o quiz ainda. Seja o primeiro!</td></tr>';
+    return;
+  }
+  let html = '<tr><th>#</th><th>Nome</th><th>Acertos</th><th>Tempo</th></tr>';
+  list.forEach((p,i)=>{
+    html += `<tr><td>${i+1}º</td><td>${p.name}</td><td>${p.score}/${QUIZ.length}</td><td>${fmtTime(p.time)}</td></tr>`;
+  });
+  table.innerHTML = html;
+}
+
+function salvarResultado(){
+  const elapsedMs = Date.now()-startTime;
+  const list = getBoard();
+  list.push({name: playerName, time: elapsedMs, score});
+  saveBoard(list);
+  enviarParaSheets(playerName, elapsedMs, QUIZ.length-score, score);
+  document.getElementById('savedName').textContent = playerName;
+  renderBoard();
+}
+
+// ---------------------------------------------------------------
+// PAINEL "QUER APRENDER MAIS?"
+// ---------------------------------------------------------------
+function renderLearnPanel(){
+  const vids = document.getElementById('videoList');
+  vids.innerHTML = LEARN_VIDEOS.map(v=>
+    `<a class="vidlink" href="${v.u}" target="_blank" rel="noopener"><span class="play">▶</span>${v.t}</a>`
+  ).join('');
+}
+renderLearnPanel();
+
+document.getElementById('fabLearn').addEventListener('click', ()=>{
+  document.getElementById('learnOverlay').classList.add('show');
+});
+document.getElementById('closeLearn').addEventListener('click', ()=>{
+  document.getElementById('learnOverlay').classList.remove('show');
+});
+document.getElementById('learnOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'learnOverlay') e.target.classList.remove('show');
+});
+
+// init
+renderBoard();
+</script>
+</body>
+</html>

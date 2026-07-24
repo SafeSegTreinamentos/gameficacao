@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Dinâmicas de Bloqueio de Energia | SafeSeg</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --amber:#F59E0B;
+    --graphite:#14171B;
+    --graphite-2:#1E2228;
+    --graphite-3:#2A2F37;
+    --paper:#F4F1E9;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 10% -10%, #23272f 0%, transparent 60%),
+      var(--graphite);
+    color:var(--paper);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+  }
+  .hazard{
+    height:10px;
+    background:repeating-linear-gradient(135deg,var(--amber) 0 22px,var(--graphite) 22px 44px);
+  }
+  header{
+    padding:26px 20px 18px;
+    text-align:center;
+    border-bottom:1px solid var(--graphite-3);
+  }
+  .eyebrow{
+    font-size:11px; letter-spacing:.28em; text-transform:uppercase;
+    color:var(--amber); font-weight:700; margin-bottom:6px;
+  }
+  h1{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(34px,9vw,50px);
+    margin:0; line-height:.95; color:#fff;
+  }
+  .sub{color:#9AA1AC; font-size:14px; margin-top:10px; max-width:480px; margin-left:auto; margin-right:auto;}
+  main{max-width:640px; margin:0 auto; padding:28px 16px 60px; display:flex; flex-direction:column; gap:16px;}
+  .card{
+    display:block;
+    text-decoration:none;
+    background:var(--graphite-2);
+    border:1px solid var(--graphite-3);
+    border-radius:16px;
+    padding:22px 20px;
+    position:relative;
+    overflow:hidden;
+    transition:transform .15s ease, border-color .15s ease;
+  }
+  .card:hover{transform:translateY(-2px); border-color:var(--amber);}
+  .card .tag{
+    display:inline-block;
+    font-family:'Bebas Neue'; font-size:12px; letter-spacing:.1em;
+    padding:4px 10px; border-radius:999px; margin-bottom:12px;
+    color:#1a1200;
+  }
+  .card h2{font-family:'Bebas Neue'; font-size:28px; color:#fff; margin:0 0 8px; letter-spacing:.02em;}
+  .card p{font-size:13.5px; color:#9AA1AC; line-height:1.55; margin:0 0 14px;}
+  .card .go{font-size:13px; color:var(--amber); font-weight:700;}
+  .card .icon{position:absolute; right:18px; top:18px; font-size:38px; opacity:.5;}
+
+  .card.eletrica .tag{background:#2D6CDF; color:#fff;}
+  .card.maquinas .tag{background:#3C9F5F; color:#fff;}
+  .card.confinado .tag{background:#B23A6B; color:#fff;}
+  .card.pet .tag{background:#178A6F; color:#fff;}
+  .card.tabuleiro .tag{background:#5B3E97; color:#fff;}
+  .card.soon{opacity:.5; cursor:not-allowed;}
+  .card.soon .tag{background:var(--graphite-3); color:#8A909B;}
+
+  footer{
+    text-align:center; padding:20px 16px 40px;
+    color:#5B616C; font-size:11.5px; letter-spacing:.04em;
+  }
+  .logo{font-family:'Bebas Neue'; color:#8A909B; letter-spacing:.06em;}
+  .logo b{color:var(--amber);}
+</style>
+</head>
+<body>
+<div class="hazard"></div>
+<header>
+  <div class="eyebrow">SafeSeg · Segurança do Trabalho</div>
+  <h1>DINÂMICAS DE<br>BLOQUEIO DE ENERGIA</h1>
+  <div class="sub">Escolha a dinâmica de acordo com a norma que você quer treinar.</div>
+</header>
+
+<main>
+  <a class="card eletrica" href="eletrica-nr10.html">
+    <span class="icon">⚡</span>
+    <span class="tag">NR-10</span>
+    <h2>Elétrica</h2>
+    <p>Desenergização de instalações elétricas — as 6 etapas oficiais do item 10.5.1: seccionamento, impedimento de reenergização, constatação da ausência de tensão, aterramento temporário, proteção dos elementos energizados e sinalização.</p>
+    <span class="go">Jogar dinâmica →</span>
+  </a>
+
+  <a class="card maquinas" href="bloqueio-maquinas-nr12.html">
+    <span class="icon">🔒</span>
+    <span class="tag">NR-12</span>
+    <h2>Bloqueio</h2>
+    <p>Bloqueio de máquinas e equipamentos em manutenção — as 5 etapas oficiais do item 12.11.3: isolar e descarregar energia, bloquear e sinalizar, garantir segurança a jusante, neutralizar energia residual e travar partes suspensas.</p>
+    <span class="go">Jogar dinâmica →</span>
+  </a>
+
+  <a class="card confinado" href="espaco-confinado-nr33.html">
+    <span class="icon">🕳️</span>
+    <span class="tag">NR-33</span>
+    <h2>Espaço Confinado</h2>
+    <p>Entrada segura em espaço confinado — as 6 etapas práticas baseadas na NR-33: reconhecer e cadastrar, emitir a PET, testar a atmosfera, ventilar e monitorar, posicionar o vigia e garantir o resgate.</p>
+    <span class="go">Jogar dinâmica →</span>
+  </a>
+
+  <a class="card pet" href="pet-nr33.html">
+    <span class="icon">📋</span>
+    <span class="tag">NR-33</span>
+    <h2>Quiz da PET</h2>
+    <p>Um quiz de 12 perguntas: para que serve cada campo da Permissão de Entrada e Trabalho — Requisição, Perigos, Check List, Avaliações de Espaço Confinado, Termo de Responsabilidade e mais.</p>
+    <span class="go">Jogar dinâmica →</span>
+  </a>
+
+  <a class="card tabuleiro" href="tabuleiro-seguranca.html">
+    <span class="icon">🏠</span>
+    <span class="tag">TABULEIRO</span>
+    <h2>Um Dia de Trabalho Seguro</h2>
+    <p>Jogo de tabuleiro para até 4 jogadores, conduzido por você: 40 casas, perguntas, desafios, atalhos e armadilhas — do momento em que sai de casa até a volta segura pra família.</p>
+    <span class="go">Jogar dinâmica →</span>
+  </a>
+</main>
+
+<footer>
+  <div class="logo">Safe<b>Seg</b> Segurança do Trabalho</div>
+  Bloqueio de energia é responsabilidade de todos.
+</footer>
+</body>
+</html>

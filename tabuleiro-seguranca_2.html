@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Um Dia de Trabalho Seguro | Jogo de Tabuleiro SafeSeg</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --amber:#F59E0B;
+    --graphite:#14171B;
+    --graphite-2:#1E2228;
+    --graphite-3:#2A2F37;
+    --danger:#D9291C;
+    --ok:#2E9B4F;
+    --blue:#2D6CDF;
+    --purple:#5B3E97;
+    --paper:#F4F1E9;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 10% -10%, #23272f 0%, transparent 60%),
+      var(--graphite);
+    color:var(--paper);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .hazard{height:10px; background:repeating-linear-gradient(135deg,var(--amber) 0 22px,var(--graphite) 22px 44px);}
+  .heroBanner{width:100%; max-height:280px; overflow:hidden; line-height:0;}
+  .heroBanner img{width:100%; height:100%; object-fit:cover; object-position:center 30%; display:block;}
+  header{padding:20px 16px 14px; text-align:center; border-bottom:1px solid var(--graphite-3);}
+  .eyebrow{font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:var(--amber); font-weight:700; margin-bottom:6px;}
+  h1{font-family:'Bebas Neue',sans-serif; font-size:clamp(30px,7vw,46px); letter-spacing:.02em; margin:0; line-height:.95; color:#fff;}
+  h1 span{color:var(--amber);}
+  .sub{color:#9AA1AC; font-size:13px; margin-top:8px; max-width:520px; margin-left:auto; margin-right:auto;}
+  main{max-width:760px; margin:0 auto; padding:18px 12px 60px;}
+
+  .btn{display:block; width:100%; border:none; border-radius:10px; padding:14px; font-family:'Bebas Neue'; font-size:17px; letter-spacing:.05em; cursor:pointer; transition:transform .1s ease, filter .15s ease;}
+  .btn:active{transform:scale(.98);}
+  .btn-amber{background:var(--amber); color:#1a1200;}
+  .btn-amber:hover{filter:brightness(1.08);}
+  .btn-danger{background:var(--danger); color:#fff;}
+  .btn-ok{background:var(--ok); color:#fff;}
+  .btn-ghost{background:transparent; color:#9AA1AC; border:1px solid var(--graphite-3);}
+  .btn[disabled]{opacity:.35; cursor:not-allowed;}
+
+  /* ---- SETUP ---- */
+  .setupCard{background:var(--graphite-2); border:1px solid var(--graphite-3); border-radius:16px; padding:22px 18px; margin-bottom:16px;}
+  .setupCard h2{font-family:'Bebas Neue'; font-size:22px; color:#fff; margin:0 0 4px;}
+  .setupCard p{font-size:13px; color:#9AA1AC; margin:0 0 16px; line-height:1.5;}
+  .countRow{display:flex; gap:8px; margin-bottom:18px;}
+  .countBtn{
+    flex:1; background:var(--graphite-3); border:2px solid transparent; border-radius:10px;
+    padding:12px 0; text-align:center; font-family:'Bebas Neue'; font-size:20px; color:#fff; cursor:pointer;
+  }
+  .countBtn.active{border-color:var(--amber); background:rgba(245,158,11,.12); color:var(--amber);}
+  .playerRow{display:flex; gap:8px; align-items:center; margin-bottom:10px;}
+  .tokenPick{display:flex; gap:4px;}
+  .tokenPick span{
+    width:34px; height:34px; border-radius:8px; background:var(--graphite-3); border:2px solid transparent;
+    display:flex; align-items:center; justify-content:center; font-size:17px; cursor:pointer;
+  }
+  .tokenPick span.active{border-color:var(--amber);}
+  .playerRow input{
+    flex:1; background:var(--graphite-3); border:1px solid #3A4048; border-radius:9px; color:#fff;
+    padding:10px 12px; font-size:14px;
+  }
+  .playerRow input:focus{outline:none; border-color:var(--amber);}
+
+  /* ---- HUD ---- */
+  .hud{
+    display:flex; gap:8px; overflow-x:auto; margin-bottom:14px; padding-bottom:2px;
+  }
+  .pchip{
+    flex:none; min-width:118px; background:var(--graphite-2); border:2px solid var(--graphite-3);
+    border-radius:12px; padding:9px 12px; font-size:12px;
+  }
+  .pchip.turn{border-color:var(--amber); background:rgba(245,158,11,.1);}
+  .pchip .name{font-weight:700; color:#fff; display:flex; align-items:center; gap:5px;}
+  .pchip .pos{color:#9AA1AC; margin-top:2px;}
+  .pchip .skip{color:var(--danger); font-size:10.5px; margin-top:2px; font-weight:700;}
+
+  /* ---- BOARD ---- */
+  .zoneLegend{
+    display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;
+  }
+  .zoneLegend .zchip{
+    display:flex; align-items:center; gap:6px;
+    background:var(--graphite-2); border:1px solid var(--graphite-3);
+    border-radius:999px; padding:5px 11px; font-size:11px; color:#C8CDD5;
+  }
+  .zoneLegend .zic{width:22px; height:22px; border-radius:7px; flex:none; display:flex; align-items:center; justify-content:center; font-size:13px; border:1px solid transparent;}
+
+  .boardWrap{background:var(--graphite-2); border:1px solid var(--graphite-3); border-radius:16px; padding:12px; margin-bottom:16px;}
+  .board{
+    display:grid; grid-template-columns:repeat(7,1fr); grid-template-rows:repeat(6,1fr);
+    gap:6px; aspect-ratio:7/6;
+  }
+  .space{
+    position:relative; border-radius:9px; background:var(--graphite-3);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-size:9px; color:#8A909B; overflow:visible; border:1px solid #333A44;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);
+    transition:transform .18s ease;
+  }
+  .space.bump{transform:scale(1.14); z-index:20; box-shadow:0 0 0 2px var(--amber);}
+  .space .num{position:absolute; top:3px; left:4px; font-size:9px; color:#6B7079; font-family:'Bebas Neue'; z-index:2;}
+  .space .ic{font-size:19px; line-height:1;}
+  .t-question{background:rgba(45,108,223,.22); border-color:var(--blue);}
+  .t-challenge{background:rgba(245,158,11,.18); border-color:var(--amber);}
+  .t-passagem{background:rgba(46,155,79,.22); border-color:var(--ok);}
+  .t-armadilha{background:rgba(217,41,28,.22); border-color:var(--danger);}
+  .t-pare{background:rgba(200,170,90,.2); border-color:#C8AA5A;}
+  .t-jogar-novo{background:rgba(46,155,79,.15); border-color:var(--ok);}
+  .space.t-home{background:rgba(91,62,151,.3); border-color:var(--purple);}
+  .space .tokens{
+    position:absolute; left:50%; bottom:-6px; transform:translateX(-50%);
+    display:flex; justify-content:center; z-index:10; pointer-events:none;
+  }
+  .space .tok{
+    font-size:34px; line-height:1;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.75));
+    transition:transform .18s ease;
+    margin-left:-10px;
+  }
+  .space .tok:first-child{margin-left:0;}
+
+  /* tonalidade sutil por zona narrativa, por trás do tipo de casa */
+  .space.z1{box-shadow:inset 0 -3px 0 0 rgba(45,108,223,.5);}
+  .space.z2{box-shadow:inset 0 -3px 0 0 rgba(245,158,11,.5);}
+  .space.z3{box-shadow:inset 0 -3px 0 0 rgba(46,155,79,.5);}
+  .space.z4{box-shadow:inset 0 -3px 0 0 rgba(91,62,151,.5);}
+  .space.z5{box-shadow:inset 0 -3px 0 0 rgba(23,138,111,.5);}
+  .cardPrompt{
+    background:var(--graphite-3); border-radius:10px; padding:16px; text-align:center;
+    font-size:15px; color:#fff; margin-bottom:10px; line-height:1.5;
+  }
+  .cardPrompt b{color:var(--amber);}
+
+  /* ---- CONTROLS ---- */
+  .controls{background:var(--graphite-2); border:1px solid var(--graphite-3); border-radius:16px; padding:18px; text-align:center; margin-bottom:16px;}
+  .diceDisplay{font-size:64px; margin-bottom:10px; line-height:1; transition:transform .15s ease;}
+  .diceDisplay.rolling{animation:diceSpin .25s linear infinite;}
+  .diceDisplay.settle{animation:diceSettle .3s ease;}
+  @keyframes diceSpin{
+    0%{transform:rotate(0deg) scale(1);}
+    50%{transform:rotate(180deg) scale(1.08);}
+    100%{transform:rotate(360deg) scale(1);}
+  }
+  @keyframes diceSettle{
+    0%{transform:scale(1.35) rotate(-8deg);}
+    60%{transform:scale(.95) rotate(4deg);}
+    100%{transform:scale(1) rotate(0deg);}
+  }
+  .turnLabel{font-size:13px; color:#9AA1AC; margin-bottom:12px;}
+  .turnLabel b{color:var(--amber);}
+
+  /* ---- EVENT MODAL ---- */
+  .overlay{position:fixed; inset:0; background:rgba(8,9,11,.85); z-index:60; display:none; align-items:center; justify-content:center; padding:16px;}
+  .overlay.show{display:flex;}
+  .modal{
+    max-width:460px; width:100%; background:linear-gradient(180deg,#1c1f24,#15171b);
+    border:2px solid var(--graphite-3); border-radius:16px; padding:22px 20px; text-align:left;
+  }
+  .modal.q{border-color:var(--blue);}
+  .modal.c{border-color:var(--amber);}
+  .modal.trap{border-color:var(--danger);}
+  .modal.shortcut{border-color:var(--ok);}
+  .modal .tag{
+    display:inline-block; font-family:'Bebas Neue'; font-size:12px; letter-spacing:.1em;
+    padding:4px 12px; border-radius:999px; margin-bottom:14px; color:#fff;
+  }
+  .modal.q .tag{background:var(--blue);}
+  .modal.c .tag{background:var(--amber); color:#1a1200;}
+  .modal.trap .tag{background:var(--danger);}
+  .modal.shortcut .tag{background:var(--ok);}
+  .modal h2{font-size:18px; line-height:1.4; color:#fff; margin:0 0 16px;}
+  .modal .opts{display:flex; flex-direction:column; gap:8px; margin-bottom:16px;}
+  .modal .opt{background:var(--graphite-3); border-radius:9px; padding:11px 13px; font-size:13.5px; color:#E5E7EB; display:flex; gap:8px;}
+  .modal .opt b{color:var(--amber); flex:none;}
+  .modal .hint{font-size:11.5px; color:#6B7079; margin-bottom:16px; font-style:italic;}
+  .judgeRow{display:flex; gap:10px;}
+  .judgeRow .btn{flex:1;}
+  .resultMsg{
+    display:none; text-align:center; padding:14px; border-radius:10px; font-size:14px; margin-top:6px;
+  }
+  .resultMsg.show{display:block;}
+  .resultMsg.ok{background:rgba(46,155,79,.15); color:#B7E3C2; border:1px solid var(--ok);}
+  .resultMsg.bad{background:rgba(217,41,28,.15); color:#F3C9C5; border:1px solid var(--danger);}
+
+  /* ---- WIN ---- */
+  .win{display:none; text-align:center; background:var(--graphite-2); border:1px solid var(--amber); border-radius:16px; padding:30px 20px;}
+  .win.show{display:block;}
+  .win .medal{font-size:60px; margin-bottom:8px;}
+  .win h2{font-family:'Bebas Neue'; font-size:30px; color:#fff; margin:0 0 8px;}
+  .win p{color:#B7BCC4; font-size:14px; line-height:1.6; max-width:400px; margin:0 auto 20px;}
+
+  .log{max-height:120px; overflow-y:auto; font-size:11.5px; color:#8A909B; background:var(--graphite-2); border:1px solid var(--graphite-3); border-radius:12px; padding:10px 12px; margin-bottom:16px;}
+  .log div{padding:2px 0; border-bottom:1px solid #22262c;}
+  .log div:last-child{border-bottom:none;}
+
+  footer{text-align:center; padding:24px 16px 40px; color:#5B616C; font-size:11.5px; letter-spacing:.04em;}
+  .logo{font-family:'Bebas Neue'; color:#8A909B; letter-spacing:.06em;}
+  .logo b{color:var(--amber);}
+
+  .fab{position:fixed; right:16px; bottom:16px; z-index:60; background:var(--amber); color:#1a1200; border:none; border-radius:999px; padding:12px 16px; font-family:'Bebas Neue'; font-size:14px; letter-spacing:.03em; display:flex; align-items:center; gap:6px; box-shadow:0 8px 24px rgba(0,0,0,.4); cursor:pointer;}
+  .rulesOverlay{position:fixed; inset:0; background:rgba(8,9,11,.7); z-index:70; display:none; align-items:flex-end; justify-content:center;}
+  .rulesOverlay.show{display:flex;}
+  .rulesPanel{width:100%; max-width:640px; max-height:85vh; overflow-y:auto; background:var(--graphite); border-top:2px solid var(--amber); border-radius:18px 18px 0 0; padding:20px 18px 30px;}
+  .rulesPanel h2{font-family:'Bebas Neue'; font-size:24px; color:#fff; margin:0 0 12px;}
+  .rulesPanel h3{font-family:'Bebas Neue'; font-size:15px; color:var(--amber); margin:16px 0 6px; letter-spacing:.03em;}
+  .rulesPanel p, .rulesPanel li{font-size:13.5px; color:#C8CDD5; line-height:1.6;}
+  .rulesPanel ul{margin:4px 0; padding-left:18px;}
+  .closeRules{display:block; margin:18px auto 0; background:transparent; border:1px solid var(--graphite-3); color:#9AA1AC; border-radius:10px; padding:11px 20px; font-family:'Bebas Neue'; font-size:14px; cursor:pointer;}
+</style>
+</head>
+<body>
+
+<div class="hazard"></div>
+<div class="heroBanner"><img src="tabuleiro-arte.jpg" alt="A Jornada Para Casa"></div>
+<header>
+  <div class="eyebrow">SafeSeg · Segurança do Trabalho</div>
+  <h1>A JORNADA<br><span>PARA CASA</span></h1>
+  <div class="sub">Sua segurança hoje, o abraço de quem te espera sempre. Até 4 jogadores — você conduz o jogo.</div>
+</header>
+
+<main>
+
+  <!-- ===================== SETUP ===================== -->
+  <div id="setupScreen">
+    <div class="setupCard">
+      <h2>Quantos jogadores?</h2>
+      <p>De 2 a 4 pessoas. Cada uma escolhe um peão.</p>
+      <div class="countRow" id="countRow"></div>
+      <div id="playersForm"></div>
+    </div>
+    <button class="btn btn-amber" id="startGameBtn">▶ COMEÇAR O JOGO</button>
+  </div>
+
+  <!-- ===================== GAME ===================== -->
+  <div id="gameScreen" style="display:none;">
+    <div class="hud" id="hud"></div>
+
+    <div class="zoneLegend" id="zoneLegend"></div>
+    <div class="boardWrap">
+      <div class="board" id="board"></div>
+    </div>
+
+    <div class="controls">
+      <div class="diceDisplay" id="diceDisplay">🎲</div>
+      <div class="turnLabel" id="turnLabel">Vez de <b>—</b></div>
+      <button class="btn btn-amber" id="rollBtn">🎲 ROLAR O DADO</button>
+    </div>
+
+    <div class="log" id="log"></div>
+  </div>
+
+  <!-- ===================== WIN ===================== -->
+  <div class="win" id="winScreen">
+    <div class="medal">🏠🎉</div>
+    <h2 id="winTitle">VOCÊ CHEGOU SEGURO</h2>
+    <p id="winMsg">Mais um dia de trabalho terminando com segurança — são e salvo, de volta pra família.</p>
+    <button class="btn btn-danger" id="restartBtn">JOGAR DE NOVO</button>
+  </div>
+
+</main>
+
+<footer>
+  <div class="logo">Safe<b>Seg</b> Segurança do Trabalho</div>
+  Segurança é o caminho de volta pra casa.
+</footer>
+
+<button class="fab" id="fabRules">📖 Regras</button>
+
+<div class="rulesOverlay" id="rulesOverlay">
+  <div class="rulesPanel">
+    <h2>Como jogar</h2>
+    <p>O tabuleiro tem <b>42 casas</b>: a jornada de um trabalhador saindo de casa, passando pelo expediente, até voltar em segurança no fim do dia.</p>
+
+    <h3>🎲 Turno</h3>
+    <p>Cada jogador, na sua vez, rola o dado e move seu peão. O tipo da casa onde ele parar define o que acontece.</p>
+
+    <h3>🧑‍❓ Pergunta</h3>
+    <p>Escolha uma carta de Pergunta impressa e leia para o jogador. Ele responde verbalmente. Você marca válido ou não válido — acertar dá 1 casa de bônus.</p>
+
+    <h3>🪨 Desafio</h3>
+    <p>Escolha uma carta de Desafio impressa e proponha ao jogador. Ele demonstra ou explica. Você julga se é válido — se for, ele avança 2 casas.</p>
+
+    <h3>⏱️ Pare</h3>
+    <p>O jogador fica uma rodada sem jogar.</p>
+
+    <h3>🕳️ Passagem Secreta</h3>
+    <p>Avanço automático — uma atitude segura acelerou o dia do trabalhador.</p>
+
+    <h3>🪤 Armadilha</h3>
+    <p>Um imprevisto de segurança: o jogador recua algumas casas.</p>
+
+    <h3>🔁 Jogue de Novo</h3>
+    <p>O jogador rola o dado imediatamente de novo, sem passar a vez.</p>
+
+    <h3>✅ Chegada</h3>
+    <p>O primeiro a alcançar ou ultrapassar a casa 42 vence — chegou em casa são e salvo, e se reúne com a família. O jogo pode continuar para definir 2º e 3º lugar, se quiser.</p>
+
+    <button class="closeRules" id="closeRules">FECHAR</button>
+  </div>
+</div>
+
+<script>
+// =================================================================
+// TABULEIRO — 42 casas, seguindo o layout de "A Jornada Para Casa"
+// =================================================================
+const SPACE_TYPES = {
+  home_start:      { icon:'🏠', cls:'t-home' },
+  home_finish:     { icon:'✅', cls:'t-home' },
+  question:        { icon:'🧑\u200d❓', cls:'t-question' },
+  challenge:       { icon:'🪨', cls:'t-challenge' },
+  passagem:        { icon:'🕳️', cls:'t-passagem' },
+  armadilha:       { icon:'🪤', cls:'t-armadilha' },
+  pare:            { icon:'⏱️', cls:'t-pare' },
+  jogue_de_novo:   { icon:'🔁', cls:'t-jogar-novo' },
+  neutral:         { icon:'', cls:'' }
+};
+
+// quanto avança uma Passagem Secreta / quanto recua uma Armadilha
+const PASSAGEM_AVANCA = 6;
+const ARMADILHA_RECUA = 5;
+
+const BOARD = [
+  { n:1,  type:'home_start' },
+  { n:2,  type:'question' },
+  { n:3,  type:'neutral' },
+  { n:4,  type:'challenge' },
+  { n:5,  type:'neutral' },
+  { n:6,  type:'passagem', msg:'Pegou um atalho seguro, combinado com o supervisor.' },
+  { n:7,  type:'question' },
+  { n:8,  type:'challenge' },
+  { n:9,  type:'neutral' },
+  { n:10, type:'neutral' },
+  { n:11, type:'pare', msg:'Esqueceu de assinar a PET — precisou parar tudo e regularizar.' },
+  { n:12, type:'neutral' },
+  { n:13, type:'neutral' },
+  { n:14, type:'question' },
+  { n:15, type:'passagem', msg:'Trabalho em equipe eficiente encurtou o caminho.' },
+  { n:16, type:'jogue_de_novo', msg:'DDS rápido e direto ao ponto — jogue de novo!' },
+  { n:17, type:'neutral' },
+  { n:18, type:'question' },
+  { n:19, type:'neutral' },
+  { n:20, type:'question' },
+  { n:21, type:'question' },
+  { n:22, type:'neutral' },
+  { n:23, type:'armadilha', msg:'Ignorou o procedimento de bloqueio de energia — quase um acidente grave.' },
+  { n:24, type:'passagem', msg:'Comunicação clara evitou um retrabalho.' },
+  { n:25, type:'neutral' },
+  { n:26, type:'neutral' },
+  { n:27, type:'neutral' },
+  { n:28, type:'neutral' },
+  { n:29, type:'neutral' },
+  { n:30, type:'jogue_de_novo', msg:'Trabalho em dia, sem pendências — jogue de novo!' },
+  { n:31, type:'passagem', msg:'Transporte da empresa pontual — chegou mais rápido.' },
+  { n:32, type:'pare', msg:'Não fez a pausa obrigatória — precisou parar agora.' },
+  { n:33, type:'neutral' },
+  { n:34, type:'armadilha', msg:'Pressa para terminar o serviço — precisou refazer tudo com calma.' },
+  { n:35, type:'neutral' },
+  { n:36, type:'question' },
+  { n:37, type:'neutral' },
+  { n:38, type:'pare', msg:'Equipamento sem inspeção — parado até liberar.' },
+  { n:39, type:'question' },
+  { n:40, type:'neutral' },
+  { n:41, type:'armadilha', msg:'Atalho perigoso pelo pátio, perto de máquinas em operação.' },
+  { n:42, type:'home_finish' }
+];
+
+const LEGEND_ITEMS = [
+  { icon:'🧑\u200d❓', label:'Pergunta',        cls:'t-question' },
+  { icon:'🪨',  label:'Desafio',         cls:'t-challenge' },
+  { icon:'⏱️',  label:'Pare',            cls:'t-pare' },
+  { icon:'🕳️',  label:'Passagem Secreta', cls:'t-passagem' },
+  { icon:'🪤',  label:'Armadilha',       cls:'t-armadilha' },
+  { icon:'🔁',  label:'Jogue de Novo',   cls:'t-jogar-novo' }
+];
+function renderZoneLegend(){
+  const el = document.getElementById('zoneLegend');
+  el.innerHTML = LEGEND_ITEMS.map(l=>
+    `<div class="zchip"><span class="zic ${l.cls}">${l.icon}</span>${l.label}</div>`
+  ).join('');
+}
+
+// posição em grade serpentina 7 colunas x 6 linhas (42 casas)
+function layoutPos(n){
+  const i = n - 1;
+  const row = Math.floor(i / 7);
+  let col = i % 7;
+  if(row % 2 === 1) col = 6 - col;
+  return { row: row+1, col: col+1 };
+}
+
+// =================================================================
+// ESTADO DO JOGO
+// =================================================================
+const TOKENS = ['👷','🦺','⛑️','🧰'];
+let playerCount = 4;
+let players = [];
+let currentTurn = 0;
+let gameOver = false;
+
+function shuffledIndices(len){
+  const a = Array.from({length:len}, (_,i)=>i);
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+// =================================================================
+// SETUP
+// =================================================================
+const countRow = document.getElementById('countRow');
+[2,3,4].forEach(n=>{
+  const b = document.createElement('div');
+  b.className = 'countBtn' + (n===4 ? ' active' : '');
+  b.textContent = n + ' jogadores';
+  b.addEventListener('click', ()=>{
+    playerCount = n;
+    document.querySelectorAll('.countBtn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    renderPlayersForm();
+  });
+  countRow.appendChild(b);
+});
+
+function renderPlayersForm(){
+  const wrap = document.getElementById('playersForm');
+  wrap.innerHTML = '';
+  for(let i=0;i<playerCount;i++){
+    const row = document.createElement('div');
+    row.className = 'playerRow';
+    const picks = TOKENS.map((t,ti)=>`<span data-i="${i}" data-t="${ti}" class="${ti===i?'active':''}">${t}</span>`).join('');
+    row.innerHTML = `<div class="tokenPick" data-player="${i}">${picks}</div><input type="text" id="pname${i}" placeholder="Nome do jogador ${i+1}" maxlength="18">`;
+    wrap.appendChild(row);
+  }
+  wrap.querySelectorAll('.tokenPick span').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const p = el.dataset.player;
+      wrap.querySelectorAll(`.tokenPick[data-player="${p}"] span`).forEach(s=>s.classList.remove('active'));
+      el.classList.add('active');
+    });
+  });
+}
+renderPlayersForm();
+
+document.getElementById('startGameBtn').addEventListener('click', ()=>{
+  players = [];
+  for(let i=0;i<playerCount;i++){
+    const nameInput = document.getElementById('pname'+i);
+    const name = (nameInput.value.trim()) || ('Jogador ' + (i+1));
+    const activeTok = document.querySelector(`.tokenPick[data-player="${i}"] span.active`);
+    const token = activeTok ? TOKENS[activeTok.dataset.t] : TOKENS[i];
+    players.push({ name, token, pos:1, skipNext:false });
+  }
+  currentTurn = 0;
+  gameOver = false;
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = '';
+  document.getElementById('winScreen').classList.remove('show');
+  buildBoard();
+  renderHud();
+  renderBoardTokens();
+  updateTurnLabel();
+  addLog(`Início do jogo — ${players.length} jogadores na estrada!`);
+});
+
+// =================================================================
+// TABULEIRO VISUAL
+// =================================================================
+function buildBoard(){
+  renderZoneLegend();
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  BOARD.forEach(sp=>{
+    const pos = layoutPos(sp.n);
+    const def = SPACE_TYPES[sp.type];
+    const el = document.createElement('div');
+    el.className = 'space ' + (def.cls || '');
+    el.id = 'space'+sp.n;
+    el.style.gridRow = pos.row;
+    el.style.gridColumn = pos.col;
+    el.innerHTML = `<span class="num">${sp.n}</span><span class="ic">${def.icon}</span><div class="tokens" id="tok${sp.n}"></div>`;
+    board.appendChild(el);
+  });
+}
+
+function renderBoardTokens(){
+  document.querySelectorAll('[id^="tok"]').forEach(t=>t.innerHTML='');
+  players.forEach(p=>{
+    const holder = document.getElementById('tok'+p.pos);
+    if(holder) holder.innerHTML += `<span class="tok">${p.token}</span>`;
+  });
+}
+
+function renderHud(){
+  const hud = document.getElementById('hud');
+  hud.innerHTML = '';
+  players.forEach((p,i)=>{
+    const chip = document.createElement('div');
+    chip.className = 'pchip' + (i===currentTurn && !gameOver ? ' turn' : '');
+    chip.innerHTML = `<div class="name">${p.token} ${p.name}</div><div class="pos">Casa ${p.pos}/42</div>${p.skipNext ? '<div class="skip">⏱ perde a vez</div>' : ''}`;
+    hud.appendChild(chip);
+  });
+}
+
+function updateTurnLabel(){
+  const p = players[currentTurn];
+  document.getElementById('turnLabel').innerHTML = `Vez de <b>${p.token} ${p.name}</b>`;
+}
+
+function addLog(msg){
+  const log = document.getElementById('log');
+  const line = document.createElement('div');
+  line.textContent = msg;
+  log.insertBefore(line, log.firstChild);
+}
+
+// =================================================================
+// TURNO / DADO
+// =================================================================
+const DICE_FACES = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+// intervalos crescentes: começa rápido e vai desacelerando, como um dado de verdade parando
+const DICE_TICKS = [70,70,80,90,100,110,130,150,180,220,270,330,400,480];
+
+document.getElementById('rollBtn').addEventListener('click', ()=>{
+  if(gameOver) return;
+  document.getElementById('rollBtn').disabled = true;
+  const dice = document.getElementById('diceDisplay');
+  dice.classList.add('rolling');
+
+  let i = 0;
+  function tick(){
+    const face = 1 + Math.floor(Math.random()*6);
+    dice.textContent = DICE_FACES[face-1];
+    i++;
+    if(i < DICE_TICKS.length){
+      setTimeout(tick, DICE_TICKS[i]);
+    } else {
+      const value = 1 + Math.floor(Math.random()*6);
+      dice.textContent = DICE_FACES[value-1];
+      dice.classList.remove('rolling');
+      dice.classList.add('settle');
+      setTimeout(()=>dice.classList.remove('settle'), 300);
+      setTimeout(()=>resolveMove(value), 250);
+    }
+  }
+  tick();
+});
+
+// move o peão casa por casa, com uma pequena pausa e "salto" em cada passo
+function animateMove(p, dest, onArrive){
+  if(p.pos === dest){ onArrive(); return; }
+  const step = dest > p.pos ? 1 : -1;
+  p.pos += step;
+  renderBoardTokens();
+  renderHud();
+  const el = document.getElementById('space'+p.pos);
+  if(el) el.classList.add('bump');
+  setTimeout(()=>{
+    if(el) el.classList.remove('bump');
+    animateMove(p, dest, onArrive);
+  }, 220);
+}
+
+function resolveMove(value){
+  const p = players[currentTurn];
+  const dest = Math.min(42, p.pos + value);
+  addLog(`${p.token} ${p.name} tirou ${value}.`);
+
+  animateMove(p, dest, ()=>{
+    if(p.pos >= 42){
+      finishGame(p);
+      return;
+    }
+    const sp = BOARD[p.pos-1];
+    triggerSpace(sp, p);
+  });
+}
+
+function triggerSpace(sp, p){
+  const type = sp.type;
+  if(type === 'neutral' || type === 'home_start'){
+    addLog(`${p.token} ${p.name} parou na casa ${sp.n}${sp.label ? ' — '+sp.label : ''}.`);
+    endTurn();
+    return;
+  }
+  if(type === 'passagem'){
+    showFxModal('shortcut', '🕳️ PASSAGEM SECRETA', sp.msg, ()=>{
+      const dest = Math.min(42, p.pos + PASSAGEM_AVANCA);
+      addLog(`${p.token} ${p.name}: ${sp.msg} Avançou ${PASSAGEM_AVANCA} casas.`);
+      animateMove(p, dest, ()=>{ if(p.pos>=42){ finishGame(p); } else { endTurn(); } });
+    });
+    return;
+  }
+  if(type === 'armadilha'){
+    showFxModal('trap', '🪤 ARMADILHA', sp.msg, ()=>{
+      const dest = Math.max(1, p.pos - ARMADILHA_RECUA);
+      addLog(`${p.token} ${p.name}: ${sp.msg} Voltou ${ARMADILHA_RECUA} casas.`);
+      animateMove(p, dest, ()=>{ endTurn(); });
+    });
+    return;
+  }
+  if(type === 'pare'){
+    showFxModal('trap', '⏱️ PARE', sp.msg, ()=>{
+      p.skipNext = true;
+      addLog(`${p.token} ${p.name}: ${sp.msg} Vai perder a próxima rodada.`);
+      renderHud();
+      endTurn();
+    });
+    return;
+  }
+  if(type === 'jogue_de_novo'){
+    showFxModal('shortcut', '🔁 JOGUE DE NOVO', sp.msg, ()=>{
+      addLog(`${p.token} ${p.name}: ${sp.msg}`);
+      document.getElementById('rollBtn').disabled = false;
+      updateTurnLabel();
+    });
+    return;
+  }
+  if(type === 'question'){
+    showQuestionModal(p);
+    return;
+  }
+  if(type === 'challenge'){
+    showChallengeModal(p);
+    return;
+  }
+}
+
+function endTurn(){
+  document.getElementById('rollBtn').disabled = false;
+  do{
+    currentTurn = (currentTurn+1) % players.length;
+  } while(consumeSkip(players[currentTurn]));
+  updateTurnLabel();
+  renderHud();
+}
+function consumeSkip(p){
+  if(p.skipNext){
+    p.skipNext = false;
+    addLog(`${p.token} ${p.name} perdeu a vez.`);
+    return true;
+  }
+  return false;
+}
+
+// =================================================================
+// MODAIS DE EVENTO
+// =================================================================
+const overlay = document.getElementById('eventOverlay') || createOverlay();
+function createOverlay(){
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+  ov.id = 'eventOverlay';
+  ov.innerHTML = '<div class="modal" id="eventModal"></div>';
+  document.body.appendChild(ov);
+  return ov;
+}
+
+function showFxModal(kind, tag, msg, onClose){
+  const modal = document.getElementById('eventModal');
+  modal.className = 'modal ' + kind;
+  modal.innerHTML = `<span class="tag">${tag}</span><h2>${msg}</h2><button class="btn btn-amber" id="fxOk">CONTINUAR</button>`;
+  overlay.classList.add('show');
+  document.getElementById('fxOk').addEventListener('click', ()=>{
+    overlay.classList.remove('show');
+    onClose();
+  });
+}
+
+function showQuestionModal(p){
+  const modal = document.getElementById('eventModal');
+  modal.className = 'modal q';
+  modal.innerHTML = `
+    <span class="tag">❓ CASA DE PERGUNTA — ${p.name}</span>
+    <div class="cardPrompt">🎴 Escolha uma carta de <b>Pergunta</b> e leia para ${p.name}</div>
+    <div class="hint">Depois de ouvir a resposta, marque o resultado abaixo.</div>
+    <div class="judgeRow">
+      <button class="btn btn-ok" id="qOk">✅ VÁLIDO</button>
+      <button class="btn btn-danger" id="qBad">❌ NÃO VÁLIDO</button>
+    </div>
+    <div class="resultMsg" id="qResult"></div>
+  `;
+  overlay.classList.add('show');
+
+  document.getElementById('qOk').addEventListener('click', ()=>{
+    const r = document.getElementById('qResult');
+    r.className = 'resultMsg ok show';
+    r.textContent = `Válido! ${p.name} avança 1 casa de bônus.`;
+    document.getElementById('qOk').disabled = true;
+    document.getElementById('qBad').disabled = true;
+    setTimeout(()=>{
+      overlay.classList.remove('show');
+      const dest = Math.min(42, p.pos+1);
+      addLog(`${p.token} ${p.name} acertou a pergunta e avançou 1 casa bônus.`);
+      animateMove(p, dest, ()=>{ if(p.pos>=42){ finishGame(p); } else { endTurn(); } });
+    }, 900);
+  });
+  document.getElementById('qBad').addEventListener('click', ()=>{
+    const r = document.getElementById('qResult');
+    r.className = 'resultMsg bad show';
+    r.textContent = `Não foi dessa vez. ${p.name} continua na casa ${p.pos}.`;
+    document.getElementById('qOk').disabled = true;
+    document.getElementById('qBad').disabled = true;
+    setTimeout(()=>{
+      overlay.classList.remove('show');
+      addLog(`${p.token} ${p.name} errou a pergunta.`);
+      endTurn();
+    }, 900);
+  });
+}
+
+function showChallengeModal(p){
+  const modal = document.getElementById('eventModal');
+  modal.className = 'modal c';
+  modal.innerHTML = `
+    <span class="tag">⚠️ CASA DE DESAFIO — ${p.name}</span>
+    <div class="cardPrompt">🎴 Escolha uma carta de <b>Desafio</b> e proponha para ${p.name}</div>
+    <div class="hint">Avalie se a resposta ou demonstração foi válida.</div>
+    <div class="judgeRow">
+      <button class="btn btn-ok" id="cOk">✅ VÁLIDO</button>
+      <button class="btn btn-danger" id="cBad">❌ NÃO VÁLIDO</button>
+    </div>
+    <div class="resultMsg" id="cResult"></div>
+  `;
+  overlay.classList.add('show');
+
+  document.getElementById('cOk').addEventListener('click', ()=>{
+    const r = document.getElementById('cResult');
+    r.className = 'resultMsg ok show';
+    r.textContent = `Desafio validado! ${p.name} avança 2 casas.`;
+    document.getElementById('cOk').disabled = true;
+    document.getElementById('cBad').disabled = true;
+    setTimeout(()=>{
+      overlay.classList.remove('show');
+      const dest = Math.min(42, p.pos+2);
+      addLog(`${p.token} ${p.name} cumpriu o desafio e avançou 2 casas.`);
+      animateMove(p, dest, ()=>{ if(p.pos>=42){ finishGame(p); } else { endTurn(); } });
+    }, 900);
+  });
+  document.getElementById('cBad').addEventListener('click', ()=>{
+    const r = document.getElementById('cResult');
+    r.className = 'resultMsg bad show';
+    r.textContent = `Sem validar dessa vez. ${p.name} continua na casa ${p.pos}.`;
+    document.getElementById('cOk').disabled = true;
+    document.getElementById('cBad').disabled = true;
+    setTimeout(()=>{
+      overlay.classList.remove('show');
+      addLog(`${p.token} ${p.name} não validou o desafio.`);
+      endTurn();
+    }, 900);
+  });
+}
+
+// =================================================================
+// FIM DE JOGO
+// =================================================================
+function finishGame(winner){
+  gameOver = true;
+  addLog(`🏠 ${winner.token} ${winner.name} chegou em casa são e salvo — VENCEU!`);
+  document.getElementById('gameScreen').style.display = 'none';
+  const win = document.getElementById('winScreen');
+  document.getElementById('winTitle').textContent = `${winner.token} ${winner.name} — VOCÊ CHEGOU SEGURO!`;
+  document.getElementById('winMsg').textContent = `Mais um dia de trabalho terminando com segurança — ${winner.name} está de volta, são e salvo, pra família.`;
+  win.classList.add('show');
+}
+
+document.getElementById('restartBtn').addEventListener('click', ()=>{
+  document.getElementById('winScreen').classList.remove('show');
+  document.getElementById('setupScreen').style.display = '';
+  document.getElementById('log').innerHTML = '';
+});
+
+// =================================================================
+// REGRAS
+// =================================================================
+document.getElementById('fabRules').addEventListener('click', ()=>{
+  document.getElementById('rulesOverlay').classList.add('show');
+});
+document.getElementById('closeRules').addEventListener('click', ()=>{
+  document.getElementById('rulesOverlay').classList.remove('show');
+});
+document.getElementById('rulesOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'rulesOverlay') e.target.classList.remove('show');
+});
+</script>
+</body>
+</html>
