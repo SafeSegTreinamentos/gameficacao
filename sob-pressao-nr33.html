@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sob Pressão — Classifique o Risco | SafeSeg</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --amber:#F59E0B; --amber-dark:#B45309; --graphite:#14171B; --graphite-soft:#23272E;
+    --paper:#FBFAF7; --line:#3A3F47;
+    --baixo:#16A34A; --medio:#F59E0B; --alto:#F97316; --critico:#DC2626;
+    --ink:#1C1E22; --muted:#9CA3AF;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; font-family:'Inter',sans-serif; color:#F4F1E8;
+    background:radial-gradient(circle at 50% 0%, #1D2128 0%, var(--graphite) 55%, #0B0D10 100%);
+    min-height:100vh; display:flex; flex-direction:column;
+  }
+  .tape{height:10px; background:repeating-linear-gradient(45deg,var(--graphite) 0 16px, var(--amber) 16px 32px); flex:none;}
+  .wrap{max-width:640px; margin:0 auto; width:100%; flex:1; display:flex; flex-direction:column; padding:0 18px 30px;}
+  header{padding:20px 0 6px; text-align:center;}
+  .brand-mark{font-family:'Bebas Neue'; font-size:13px; letter-spacing:1.5px; color:var(--amber);}
+  h1{font-family:'Bebas Neue'; font-size:38px; letter-spacing:.5px; margin:6px 0 2px; line-height:1;}
+  .tagline{font-size:12.5px; color:var(--muted); margin-bottom:6px;}
+
+  .screen{display:none; flex:1; flex-direction:column;}
+  .screen.active{display:flex;}
+
+  /* GATE */
+  #gate{align-items:center; justify-content:center; text-align:center; gap:18px;}
+  #gate p{font-size:13.5px; color:#D8D4CA; max-width:420px; line-height:1.5;}
+  #nameInput{
+    width:100%; max-width:320px; padding:14px 16px; font-size:16px; font-family:'Inter'; font-weight:600;
+    border:2px solid var(--line); background:var(--graphite-soft); color:#fff; text-align:center;
+  }
+  #nameInput:focus{outline:none; border-color:var(--amber);}
+  #startBtn{
+    font-family:'Bebas Neue'; font-size:20px; letter-spacing:1px; padding:14px 34px;
+    background:var(--amber); color:var(--graphite); border:none; cursor:not-allowed; opacity:.4; transition:opacity .2s;
+  }
+  #startBtn.ready{cursor:pointer; opacity:1;}
+  #startBtn.ready:hover{background:#fff;}
+  .rules{font-size:11.5px; color:var(--muted); max-width:400px; line-height:1.6; border-top:1px solid var(--line); padding-top:14px; margin-top:6px;}
+
+  /* GAME */
+  #game{gap:14px; padding-top:4px;}
+  .hud{display:flex; justify-content:space-between; align-items:center; font-size:11.5px; color:var(--muted);}
+  .hud b{color:#fff; font-size:14px;}
+  .gauge{
+    height:16px; background:var(--graphite-soft); border:1.5px solid var(--line); position:relative; overflow:hidden;
+  }
+  .gauge-zones{position:absolute; inset:0; display:flex;}
+  .gauge-zones span{flex:1; border-right:1px solid rgba(0,0,0,.25);}
+  .gauge-fill{
+    position:absolute; top:0; left:0; height:100%; width:0%;
+    background:linear-gradient(90deg, var(--baixo), var(--medio) 50%, var(--critico));
+    transition:width .35s ease;
+  }
+  .gauge-label{display:flex; justify-content:space-between; font-size:9.5px; color:var(--muted); letter-spacing:.4px; text-transform:uppercase;}
+
+  .timerbar{height:5px; background:var(--graphite-soft); overflow:hidden;}
+  .timerbar-fill{height:100%; background:var(--amber); width:100%; transition:width linear;}
+
+  .card{
+    background:var(--graphite-soft); border:2px solid var(--line); border-left:6px solid var(--amber);
+    padding:22px 20px; min-height:130px; display:flex; align-items:center; font-size:15.5px; line-height:1.45; font-weight:500;
+  }
+  .card .qn{font-family:'Bebas Neue'; color:var(--amber); font-size:11px; letter-spacing:1px; display:block; margin-bottom:8px;}
+
+  .options{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .opt{
+    font-family:'Bebas Neue'; font-size:16px; letter-spacing:.5px; padding:16px 10px; border:none; cursor:pointer; color:#fff;
+    display:flex; align-items:center; justify-content:center; gap:8px; transition:transform .12s;
+  }
+  .opt:active{transform:scale(.97);}
+  .opt.baixo{background:var(--baixo);}
+  .opt.medio{background:var(--medio); color:var(--graphite);}
+  .opt.alto{background:var(--alto);}
+  .opt.critico{background:var(--critico);}
+  .opt:disabled{opacity:.5; cursor:default;}
+
+  .feedback{
+    display:none; padding:16px 18px; font-size:13px; line-height:1.5; border-left:6px solid var(--amber); background:var(--graphite-soft);
+  }
+  .feedback.show{display:block;}
+  .feedback .verdict{font-family:'Bebas Neue'; font-size:16px; letter-spacing:.5px; margin-bottom:4px;}
+  .feedback.ok{border-left-color:var(--baixo);}
+  .feedback.ok .verdict{color:var(--baixo);}
+  .feedback.bad{border-left-color:var(--critico);}
+  .feedback.bad .verdict{color:var(--critico);}
+
+  /* END */
+  #end{align-items:center; justify-content:center; text-align:center; gap:14px;}
+  #end .big{font-family:'Bebas Neue'; font-size:52px; color:var(--amber); line-height:1;}
+  #end .sub{font-size:13px; color:var(--muted);}
+  .board{width:100%; max-width:360px; text-align:left; margin-top:8px;}
+  .board h3{font-family:'Bebas Neue'; font-size:14px; letter-spacing:1px; color:var(--amber); border-bottom:1px solid var(--line); padding-bottom:6px;}
+  .board-row{display:flex; justify-content:space-between; font-size:13px; padding:6px 0; border-bottom:1px dashed var(--line);}
+  .board-row b{color:#fff;}
+  .btnrow{display:flex; gap:10px; margin-top:10px;}
+  .btnrow button{
+    font-family:'Bebas Neue'; font-size:15px; letter-spacing:.5px; padding:12px 22px; border:2px solid var(--amber); background:transparent; color:var(--amber); cursor:pointer;
+  }
+  .btnrow button.primary{background:var(--amber); color:var(--graphite);}
+  .btnrow button:hover{background:var(--amber); color:var(--graphite);}
+
+  footer{text-align:center; font-size:10px; color:var(--muted); padding-top:10px;}
+</style>
+</head>
+<body>
+<div class="tape"></div>
+<div class="wrap">
+  <header>
+    <div class="brand-mark">SAFESEG · DINÂMICAS DE TREINAMENTO</div>
+    <h1>Sob Pressão</h1>
+    <div class="tagline">Classifique o risco antes que o ambiente colapse — Espaço Confinado / NR-33</div>
+  </header>
+
+  <!-- GATE -->
+  <div id="gate" class="screen active">
+    <p>Você vai ver situações reais de entrada em espaço confinado. Classifique o nível de risco de cada uma: <b>Baixo, Médio, Alto ou Crítico</b>. Cada erro aumenta a pressão do ambiente. Se a pressão chegar a 100%, o ambiente colapsa e o jogo acaba.</p>
+    <input type="text" id="nameInput" placeholder="Digite seu nome" maxlength="30">
+    <button id="startBtn" disabled>INICIAR</button>
+    <div class="rules">12 situações por rodada · 10 segundos por resposta · resposta certa alivia a pressão, errada ou sem tempo aumenta.</div>
+  </div>
+
+  <!-- GAME -->
+  <div id="game" class="screen">
+    <div class="hud">
+      <div>Jogador: <b id="hudName">—</b></div>
+      <div>Situação <b id="hudRound">1</b>/12 · Pontos <b id="hudScore">0</b></div>
+    </div>
+    <div>
+      <div class="gauge-label"><span>Ambiente estável</span><span id="gaugePct">0%</span><span>Colapso</span></div>
+      <div class="gauge"><div class="gauge-fill" id="gaugeFill"></div></div>
+    </div>
+    <div class="timerbar"><div class="timerbar-fill" id="timerFill"></div></div>
+    <div class="card"><div><span class="qn">SITUAÇÃO</span><span id="cardText">—</span></div></div>
+    <div class="options">
+      <button class="opt baixo" data-lvl="baixo">Baixo</button>
+      <button class="opt medio" data-lvl="medio">Médio</button>
+      <button class="opt alto" data-lvl="alto">Alto</button>
+      <button class="opt critico" data-lvl="critico">Crítico</button>
+    </div>
+    <div class="feedback" id="feedback"><div class="verdict" id="fbVerdict"></div><div id="fbText"></div></div>
+  </div>
+
+  <!-- END -->
+  <div id="end" class="screen">
+    <div id="endTitle" class="big">—</div>
+    <div class="sub" id="endSub"></div>
+    <div class="board">
+      <h3>Melhores desta tela</h3>
+      <div id="leaderboard"></div>
+    </div>
+    <div class="btnrow">
+      <button class="primary" id="againBtn">JOGAR DE NOVO</button>
+      <button id="restartBtn">TROCAR JOGADOR</button>
+    </div>
+  </div>
+
+  <footer>SafeSeg Segurança do Trabalho — material de apoio didático, NR-33</footer>
+</div>
+
+<script>
+const DECK = [
+  {t:"Medição de atmosfera feita há 5 minutos, dentro dos parâmetros, com ventilação mecânica ligada.", l:"baixo", w:"Atmosfera monitorada e controlada — condição segura para entrada."},
+  {t:"Vigia posicionado, comunicação por rádio testada e funcionando.", l:"baixo", w:"Vigia e comunicação ativos reduzem o risco a um nível controlado."},
+  {t:"PET preenchida corretamente, com todos os campos assinados.", l:"baixo", w:"Documentação completa é a base de uma entrada segura."},
+  {t:"Iluminação auxiliar de baixa tensão instalada corretamente.", l:"baixo", w:"Equipamento adequado para o ambiente reduz risco elétrico."},
+  {t:"Equipe usando os EPIs especificados para a atividade.", l:"baixo", w:"Proteção individual correta para o risco identificado."},
+  {t:"Área externa isolada com cones e fita de sinalização.", l:"baixo", w:"Isolamento evita interferência externa e acesso indevido."},
+  {t:"Ventilação mecânica ligada, mas sem monitoramento contínuo de gases durante a atividade.", l:"medio", w:"Ventilação sozinha não garante atmosfera segura sem monitoramento contínuo."},
+  {t:"Vigia presente, mas realizando outra tarefa ao mesmo tempo.", l:"medio", w:"Vigia distraído compromete a resposta rápida em caso de emergência."},
+  {t:"Escada de acesso em bom estado, mas sem ponto de ancoragem para trava-quedas.", l:"medio", w:"Falta de ancoragem é uma lacuna que aumenta o risco de queda."},
+  {t:"Temperatura interna elevada, sem controle de tempo de permanência.", l:"medio", w:"Estresse térmico sem controle de tempo é um risco progressivo."},
+  {t:"Iluminação improvisada com extensão elétrica comum.", l:"medio", w:"Equipamento fora de especificação para o ambiente aumenta o risco elétrico."},
+  {t:"Comunicação por gestos visuais, sem rádio.", l:"medio", w:"Comunicação visual falha quando o executante sai do campo de visão."},
+  {t:"Fonte de energia isolada apenas no botão liga/desliga, sem bloqueio físico.", l:"alto", w:"Sem bloqueio e etiquetagem física, o equipamento pode ser religado por engano."},
+  {t:"Medição de atmosfera feita antes da abertura, não repetida depois.", l:"alto", w:"A atmosfera muda após a abertura — medição desatualizada é medição inválida."},
+  {t:"Espaço com histórico de acúmulo de gás sulfídrico (H₂S), sem monitor contínuo.", l:"alto", w:"Histórico conhecido de gás tóxico exige monitoramento contínuo, não pontual."},
+  {t:"Nenhum sistema de resgate montado, apenas uma corda amarrada na cintura do trabalhador.", l:"alto", w:"Improviso no resgate não substitui tripé e sistema de içamento adequados."},
+  {t:"Trabalhador entrando sozinho, vigia ausente do posto.", l:"alto", w:"Entrada sem vigia elimina a primeira linha de resposta a emergências."},
+  {t:"Produto químico incompatível armazenado próximo à abertura do espaço.", l:"alto", w:"Risco de reação química ou contaminação cruzada durante a atividade."},
+  {t:"Nenhuma medição de atmosfera realizada e trabalhador já dentro do espaço.", l:"critico", w:"Entrada sem qualquer medição prévia é uma das causas mais comuns de acidente fatal."},
+  {t:"Vigia tentando resgatar a vítima sozinho, sem equipamento de respiração autônoma.", l:"critico", w:"Resgate improvisado é a principal causa de acidentes com múltiplas vítimas."},
+  {t:"Espaço com atmosfera confirmada deficiente em oxigênio, execução segue mesmo assim.", l:"critico", w:"Prosseguir com atmosfera deficiente confirmada é risco iminente à vida."},
+  {t:"PET inexistente, entrada autorizada verbalmente pelo encarregado.", l:"critico", w:"Sem PET não há controle formal nem responsabilidade documentada pela entrada."},
+  {t:"Engolfamento em andamento — material cedendo sob o trabalhador dentro do silo.", l:"critico", w:"Emergência em curso — risco máximo, exige ativação imediata do plano de resgate."},
+  {t:"Alarme de gás inflamável disparado, equipe ainda dentro do espaço.", l:"critico", w:"Alarme ativo com equipe dentro exige evacuação imediata, sem exceções."}
+];
+const LEVELS = ["baixo","medio","alto","critico"];
+const LABELS = {baixo:"Baixo",medio:"Médio",alto:"Alto",critico:"Crítico"};
+const LS_KEY = "safeseg_sobpressao_nr33_leaderboard";
+const ROUNDS = 12, TIME_PER_Q = 10;
+
+// ---------------------------------------------------------------
+// INTEGRAÇÃO COM GOOGLE SHEETS (ver README.md para configurar)
+// ---------------------------------------------------------------
+const SHEET_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzba4mOvXe2E8mOyM9o-w536HOQw8WlXeAPJhqKI1I-gM7QYs_AlR-rwubDs2nXD9j6kA/exec";
+const JOGO_ID = "sob_pressao_nr33";
+
+function fmtTime(ms){
+  const s = Math.floor(ms/1000);
+  const m = Math.floor(s/60);
+  const r = s%60;
+  return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0');
+}
+
+function enviarParaSheets(nome, tempoMs, erros, tentativas){
+  if(!SHEET_WEBAPP_URL || !SHEET_WEBAPP_URL.startsWith('http')) return;
+  fetch(SHEET_WEBAPP_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ jogo: JOGO_ID, nome, tempo: fmtTime(tempoMs), erros, tentativas })
+  }).catch(()=>{});
+}
+
+let deck=[], idx=0, score=0, pressure=0, timer=null, timeLeft=TIME_PER_Q, playerName="", locked=false, startTime=null, errCount=0;
+
+const $ = id => document.getElementById(id);
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $(id).classList.add('active');}
+
+$('nameInput').addEventListener('input', e=>{
+  const ok = e.target.value.trim().length>0;
+  $('startBtn').disabled = !ok;
+  $('startBtn').classList.toggle('ready', ok);
+});
+$('startBtn').addEventListener('click', ()=>{
+  if($('startBtn').disabled) return;
+  playerName = $('nameInput').value.trim();
+  startGame();
+});
+$('againBtn').addEventListener('click', startGame);
+$('restartBtn').addEventListener('click', ()=>{ $('nameInput').value=''; $('startBtn').disabled=true; $('startBtn').classList.remove('ready'); showScreen('gate'); });
+
+function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function startGame(){
+  deck = shuffle(DECK).slice(0, ROUNDS);
+  idx=0; score=0; pressure=0; locked=false; errCount=0; startTime=Date.now();
+  $('hudName').textContent = playerName;
+  $('hudScore').textContent = '0';
+  updateGauge();
+  showScreen('game');
+  nextCard();
+}
+
+function updateGauge(){
+  $('gaugeFill').style.width = pressure+'%';
+  $('gaugePct').textContent = pressure+'%';
+}
+
+function nextCard(){
+  if(idx >= deck.length){ return endGame(true); }
+  locked=false;
+  $('hudRound').textContent = idx+1;
+  $('feedback').className='feedback';
+  const c = deck[idx];
+  $('cardText').textContent = c.t;
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=false);
+  startTimer();
+}
+
+function startTimer(){
+  clearInterval(timer);
+  timeLeft = TIME_PER_Q;
+  $('timerFill').style.transition='none';
+  $('timerFill').style.width='100%';
+  requestAnimationFrame(()=>{
+    $('timerFill').style.transition = `width ${TIME_PER_Q}s linear`;
+    $('timerFill').style.width='0%';
+  });
+  timer = setTimeout(()=> answer(null), TIME_PER_Q*1000);
+}
+
+document.querySelectorAll('.opt').forEach(btn=>{
+  btn.addEventListener('click', ()=> answer(btn.dataset.lvl));
+});
+
+function answer(chosen){
+  if(locked) return;
+  locked = true;
+  clearTimeout(timer);
+  const c = deck[idx];
+  const correct = chosen === c.l;
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+
+  const fb = $('feedback');
+  fb.classList.add('show', correct? 'ok':'bad');
+  $('fbVerdict').textContent = correct ? 'Classificação correta' : (chosen===null ? 'Tempo esgotado' : 'Classificação incorreta') + ` — era ${LABELS[c.l]}`;
+  $('fbText').textContent = c.w;
+
+  if(correct){
+    const bonus = Math.round((timeLeft>0?1:0) * 5);
+    score += 10;
+    pressure = Math.max(0, pressure - 8);
+  } else {
+    pressure = Math.min(100, pressure + 22);
+    errCount++;
+  }
+  $('hudScore').textContent = score;
+  updateGauge();
+
+  idx++;
+  setTimeout(()=>{
+    if(pressure>=100){ endGame(false); } else { nextCard(); }
+  }, 1600);
+}
+
+function endGame(survived){
+  clearTimeout(timer);
+  showScreen('end');
+  $('endTitle').textContent = survived ? 'Turno concluído' : 'Colapso!';
+  $('endSub').textContent = survived
+    ? `${playerName}, você fechou a rodada com ${score} pontos e pressão em ${pressure}%.`
+    : `${playerName}, a pressão do ambiente chegou a 100% — você fez ${score} pontos antes do colapso.`;
+  saveScore(playerName, score, survived);
+  renderLeaderboard();
+}
+
+function saveScore(name, sc, survived){
+  let list = [];
+  try{ list = JSON.parse(localStorage.getItem(LS_KEY)) || []; }catch(e){ list=[]; }
+  list.push({name, score:sc, survived, date:new Date().toISOString()});
+  list.sort((a,b)=> b.score-a.score);
+  list = list.slice(0,10);
+  localStorage.setItem(LS_KEY, JSON.stringify(list));
+  const elapsedMs = startTime ? (Date.now()-startTime) : 0;
+  enviarParaSheets(name, elapsedMs, errCount, sc);
+}
+
+function renderLeaderboard(){
+  let list = [];
+  try{ list = JSON.parse(localStorage.getItem(LS_KEY)) || []; }catch(e){ list=[]; }
+  const el = $('leaderboard');
+  el.innerHTML = list.length ? list.map((r,i)=>`<div class="board-row"><span>${i+1}. ${r.name}</span><b>${r.score} pts</b></div>`).join('') : '<div class="board-row"><span>Sem registros ainda</span></div>';
+}
+</script>
+</body>
+</html>
